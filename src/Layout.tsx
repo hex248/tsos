@@ -7,17 +7,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex flex-col h-[100vh] items-center">
-            <header className="w-full flex items-center justify-between border-b h-12 p-2">
+            <header className="w-full flex items-center justify-between border-b h-12 p-4">
                 <ThemeToggle />
                 <h1 className="text-3xl font-bold">The Shape of Sound</h1>
                 {router.pathname !== "/settings" && (
                     <Link to="/settings" className="">
-                        <Settings />
+                        <Settings className="size-6" />
                     </Link>
                 )}
                 {router.pathname !== "/" && (
                     <Link to="/" className="">
-                        <Home />
+                        <Home className="size-6" />
                     </Link>
                 )}
             </header>

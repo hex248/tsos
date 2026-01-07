@@ -23,13 +23,14 @@ function ThemeToggle() {
         <Button
             type="button"
             variant="dummy"
+            size="none"
             className="rounded cursor-pointer"
             onClick={() => {
                 if (!theme || theme === "light") updateTheme("dark");
                 else updateTheme("light");
             }}
         >
-            {theme === "dark" ? <Sun /> : <Moon />}
+            {theme === "dark" ? <Sun className="size-6" /> : <Moon className="size-6" />}
         </Button>
     );
 }
