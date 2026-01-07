@@ -1,8 +1,9 @@
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-function ThemeToggle() {
+function ThemeToggle({ className }: { className?: string }) {
     const [theme, setTheme] = useState<string | null>();
 
     useEffect(() => {
@@ -22,9 +23,9 @@ function ThemeToggle() {
     return (
         <Button
             type="button"
-            variant="dummy"
-            size="none"
-            className="rounded cursor-pointer"
+            variant="ghost"
+            size="icon"
+            className={cn("", className)}
             onClick={() => {
                 if (!theme || theme === "light") updateTheme("dark");
                 else updateTheme("light");
