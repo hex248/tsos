@@ -1,5 +1,6 @@
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 function ThemeToggle() {
     const [theme, setTheme] = useState<string | null>();
@@ -19,8 +20,9 @@ function ThemeToggle() {
     }
 
     return (
-        <button
+        <Button
             type="button"
+            variant="dummy"
             className="rounded cursor-pointer"
             onClick={() => {
                 if (!theme || theme === "light") updateTheme("dark");
@@ -28,7 +30,7 @@ function ThemeToggle() {
             }}
         >
             {theme === "dark" ? <Sun /> : <Moon />}
-        </button>
+        </Button>
     );
 }
 
