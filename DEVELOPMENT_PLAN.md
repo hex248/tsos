@@ -86,10 +86,10 @@ src/
 - [x] Install `react-konva`, `konva`, `tone`, `simplex-noise`
 - [x] Initialize shadcn (neutral base, no CSS overwrite)
 - [x] Add shadcn components: `button`, `slider`, `toggle`
-- [ ] Create `types/shape.ts` with `ShapeState` interface
-- [ ] Create `Layout.tsx` - sidebar (fixed width) + canvas area (flex-1)
-- [ ] Update `Index.tsx` to use Layout
-- [ ] Verify existing dark theme still works
+- [x] Create `types/shape.ts` with `ShapeState` interface
+- [x] Create `Layout.tsx` - sidebar (fixed width) + canvas area (flex-1)
+- [x] Update `Index.tsx` to use Layout
+- [x] Verify existing dark theme still works
 
 ### Deliverables
 
