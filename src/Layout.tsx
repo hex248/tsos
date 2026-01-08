@@ -3,7 +3,13 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout({
+    children,
+    sidebarContent,
+}: {
+    children: React.ReactNode;
+    sidebarContent?: React.ReactNode;
+}) {
     const location = useLocation();
 
     return (
@@ -13,7 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">The Shape of Sound</h1>
                 </div>
-                <div className="flex-1">{/* controls will go here in later phases */}</div>
+                <div className="flex-1">{sidebarContent || null}</div>
 
                 <div className="flex items-center gap-4">
                     <ThemeToggle className="rounded-lg" />

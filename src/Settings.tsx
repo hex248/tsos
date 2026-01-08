@@ -1,7 +1,9 @@
+import Layout from "@/Layout";
+
 export default function Settings() {
     return (
-        <div className="w-full h-full flex flex-col items-center justify-start">
+        <Layout>
             <p>Settings Page</p>
-        </div>
+        </Layout>
     );
 }

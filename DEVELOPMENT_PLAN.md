@@ -104,12 +104,12 @@ src/
 
 ### Tasks
 
-- [ ] Create `useShapeState.ts` hook with default values
-- [ ] Add `beforeunload` warning when state has changed
-- [ ] Create `ShapeCanvas.tsx` - Konva Stage that fills container
-- [ ] Create `MorphableShape.tsx` - renders a simple circle for now
-- [ ] Make shape draggable, update state on drag end
-- [ ] Display current x/y in sidebar (debug, remove later)
+- [x] Create `useShapeState.ts` hook with default values
+- [x] Add `beforeunload` warning when state has changed
+- [x] Create `ShapeCanvas.tsx` - Konva Stage that fills container
+- [x] Create `MorphableShape.tsx` - renders a simple circle for now
+- [x] Make shape draggable, update state on drag end
+- [x] Display current x/y in sidebar (debug, remove later)
 
 ### Deliverables
 

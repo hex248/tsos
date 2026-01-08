@@ -1,16 +1,18 @@
-import { Stage, Layer, Circle } from "react-konva";
 import { useEffect, useState } from "react";
+import ShapeCanvas from "@/components/canvas/ShapeCanvas";
+import { useShapeState } from "@/hooks/useShapeState";
+import Layout from "./Layout";
 
 function Index() {
     const [dimensions, setDimensions] = useState({
-        width: window.innerWidth,
+        width: window.innerWidth - 320,
         height: window.innerHeight,
     });
 
     useEffect(() => {
         const handleResize = () => {
             setDimensions({
-                width: window.innerWidth,
+                width: window.innerWidth - 320,
                 height: window.innerHeight,
             });
         };
@@ -19,18 +21,15 @@ function Index() {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // canvas fills the available space (accounting for sidebar width of 320px)
-    const canvasWidth = dimensions.width - 320;
-    const canvasHeight = dimensions.height;
+    const centerX = dimensions.width / 2;
+    const centerY = dimensions.height / 2;
+
+    const [state, setState] = useShapeState(centerX, centerY);
 
     return (
-        <>
-            <Stage width={canvasWidth} height={canvasHeight} className="">
-                <Layer>
-                    <Circle x={canvasWidth / 2} y={canvasHeight / 2} radius={100} fill="#68d436" draggable />
-                </Layer>
-            </Stage>
-        </>
+        <Layout sidebarContent={<>controls here</>}>
+            <ShapeCanvas state={state} onStateChange={setState} />
+        </Layout>
     );
 }
 
