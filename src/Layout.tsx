@@ -16,7 +16,8 @@ export default function Layout({
         <div className="flex h-screen w-full">
             {/* sidebar - fixed width */}
             <div className="w-80 border-r bg-card p-4 flex flex-col gap-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <img src="/icon.png" alt="" aria-hidden="true" className="size-8" />
                     <h1 className="text-2xl font-semibold">The Shape of Sound</h1>
                 </div>
                 <div className="flex-1">{sidebarContent || null}</div>
