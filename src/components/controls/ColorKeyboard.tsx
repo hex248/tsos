@@ -49,8 +49,8 @@ export default function ColorKeyboard({
                             style={
                                 isActive
                                     ? {
-                                          backgroundColor: note === "E" ? "#000000" : "#ffffff",
-                                          color: note === "E" ? "#ffffff" : "#000000",
+                                          backgroundColor: ["D", "E"].includes(note) ? "#000000" : "#ffffff",
+                                          color: ["D", "E"].includes(note) ? "#ffffff" : "#000000",
                                       }
                                     : { backgroundColor: color }
                             }
@@ -64,6 +64,7 @@ export default function ColorKeyboard({
             {BLACK_KEYS.map((key) => {
                 const color = colorByNote[key.note];
                 const isActive = color.toLowerCase() === value.toLowerCase();
+                const width = 10;
 
                 return (
                     <Toggle
@@ -76,8 +77,8 @@ export default function ColorKeyboard({
                             isActive ? "" : "",
                         )}
                         style={{
-                            width: "8%",
-                            left: `${(key.position + 1) * (100 / WHITE_KEYS.length) - 4}%`,
+                            width: `${width}%`,
+                            left: `${(key.position + 1) * (100 / WHITE_KEYS.length) - width / 2}%`,
                             backgroundColor: color,
                         }}
                         aria-label={`Select ${key.note}`}
