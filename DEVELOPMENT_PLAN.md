@@ -125,16 +125,16 @@ src/
 
 ### Tasks
 
-- [ ] Create `lib/shapes/points.ts`:
+- [x] Create `lib/shapes/points.ts`:
   - `generateCirclePoints(cx, cy, radius, numPoints)`
   - `generateTrianglePoints(cx, cy, radius, numPoints)` - points clustered at vertices
   - `generateSquarePoints(cx, cy, radius, numPoints)` - points clustered at corners
-- [ ] Create `lib/shapes/morph.ts`:
+- [x] Create `lib/shapes/morph.ts`:
   - `morphPoints(fromPoints, toPoints, t)` - lerp each point
-- [ ] Update `MorphableShape.tsx` to render as closed `Line` path
-- [ ] Create `PresetSelector.tsx` with 3 shadcn buttons
-- [ ] Add roundness `Slider` to sidebar
-- [ ] Wire preset + roundness to shape rendering
+- [x] Update `MorphableShape.tsx` to render as closed `Line` path
+- [x] Create `PresetSelector.tsx` with 3 shadcn buttons
+- [x] Add roundness `Slider` to sidebar
+- [x] Wire preset + roundness to shape rendering
 
 ### Deliverables
 
