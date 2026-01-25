@@ -26,6 +26,11 @@ export function mapGrainToNoise(grain: number): number {
     return clamp01(grain / 100);
 }
 
+export function mapWobbleToDetune(wobble: number): number {
+    const maxCents = 50;
+    return clamp01(wobble / 100) * maxCents;
+}
+
 function clamp01(value: number) {
     return Math.min(1, Math.max(0, value));
 }

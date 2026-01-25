@@ -5,7 +5,14 @@ import { Toggle } from "@/components/ui/toggle";
 import { useAudioContext } from "@/hooks/useAudioContext";
 import { useShapeState } from "@/hooks/useShapeState";
 import { useSynth } from "@/hooks/useSynth";
-import { mapGrainToNoise, mapPresetToOscType, mapRoundnessToFade, mapSizeToGain } from "@/lib/audio/mapping";
+import { useWobbleAnimation } from "@/hooks/useWobbleAnimation";
+import {
+    mapGrainToNoise,
+    mapPresetToOscType,
+    mapRoundnessToFade,
+    mapSizeToGain,
+    mapWobbleToDetune,
+} from "@/lib/audio/mapping";
 import { useEffect, useState } from "react";
 import * as Tone from "tone";
 import Layout from "./Layout";
@@ -35,6 +42,7 @@ function Index() {
     const [state, setState] = useShapeState(centerX, centerY);
     const { isMuted, toggleMute } = useAudioContext();
     const synthRef = useSynth();
+    const pitchTime = useWobbleAnimation(state.wobbleSpeed);
 
     useEffect(() => {
         if (!synthRef.current) return;
@@ -43,11 +51,15 @@ function Index() {
         nodes.oscillatorA.type = mapPresetToOscType(state.preset);
         nodes.crossFade.fade.value = mapRoundnessToFade(state.roundness);
         nodes.gain.gain.value = Tone.dbToGain(mapSizeToGain(state.size));
+        const detuneDepth = mapWobbleToDetune(state.wobble);
+        const detune = Math.sin(pitchTime * Math.PI * 2) * detuneDepth;
+        nodes.oscillatorA.detune.value = detune;
+        nodes.oscillatorB.detune.value = detune;
 
         const grain = mapGrainToNoise(state.grain);
         const noiseDb = grain === 0 ? Number.NEGATIVE_INFINITY : -40 + (-12 - -40) * grain;
         nodes.noise.volume.value = noiseDb;
-    }, [state.preset, state.roundness, state.size, state.grain, synthRef]);
+    }, [state.preset, state.roundness, state.size, state.wobble, state.grain, synthRef, pitchTime]);
 
     const sidebarContent = (
         <div className="flex flex-col gap-4">
