@@ -150,8 +150,8 @@ src/
 
 ### Tasks
 
-- [ ] Create `lib/noise.ts` - export shared simplex instance
-- [ ] Create `lib/shapes/wobble.ts`:
+- [x] Create `lib/noise.ts` - export shared simplex instance
+- [x] Create `lib/shapes/wobble.ts`:
   - `applyWobble(points, time, amount, noiseScale)` - displace points using noise
 - [ ] Create `useWobbleAnimation.ts` - RAF loop, tracks elapsed time
 - [ ] Update `MorphableShape.tsx` to apply wobble each frame
