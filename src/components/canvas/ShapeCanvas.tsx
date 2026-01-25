@@ -1,7 +1,7 @@
-import { Stage, Layer } from "react-konva";
-import { useEffect, useState } from "react";
-import MorphableShape from "./MorphableShape";
 import type { ShapeState } from "@/types/shape";
+import { useEffect, useState } from "react";
+import { Layer, Stage } from "react-konva";
+import MorphableShape from "./MorphableShape";
 
 export default function ShapeCanvas({
     state,

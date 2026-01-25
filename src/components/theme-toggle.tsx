@@ -1,7 +1,7 @@
-import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 
 function ThemeToggle({ className }: { className?: string }) {
     const [theme, setTheme] = useState<string | null>();

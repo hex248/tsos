@@ -1,7 +1,7 @@
 import ThemeToggle from "@/components/theme-toggle";
-import { Link, useLocation } from "react-router-dom";
-import { Home, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Home, Settings } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Layout({
     children,

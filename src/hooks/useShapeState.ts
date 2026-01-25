@@ -39,17 +39,17 @@ export function useShapeState(centerX: number, centerY: number) {
     }, [centerX, centerY]);
 
     // beforeunload warning
-    useEffect(() => {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            const hasChanged = JSON.stringify(state) !== JSON.stringify(initialStateRef.current);
-            if (hasChanged) {
-                e.preventDefault();
-            }
-        };
+    // useEffect(() => {
+    //     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    //         const hasChanged = JSON.stringify(state) !== JSON.stringify(initialStateRef.current);
+    //         if (hasChanged) {
+    //             e.preventDefault();
+    //         }
+    //     };
 
-        window.addEventListener("beforeunload", handleBeforeUnload);
-        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-    }, [state]);
+    //     window.addEventListener("beforeunload", handleBeforeUnload);
+    //     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    // }, [state]);
 
     return [state, setState] as const;
 }
