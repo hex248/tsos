@@ -4,8 +4,8 @@ import type { ShapeState } from "@/types/shape";
 const DEFAULT_STATE: ShapeState = {
     x: 0,
     y: 0,
-    preset: "circle",
-    roundness: 100, // full circle
+    preset: "square",
+    roundness: 15, // full circle
     size: 50, // medium
     wobble: 20, // subtle
     wobbleSpeed: 50, // medium
