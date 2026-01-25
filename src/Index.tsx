@@ -52,6 +52,24 @@ function Index() {
                     className={state.preset === "circle" ? "opacity-50 pointer-events-none" : ""}
                 />
             </div>
+            <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium">Wobble</span>
+                <Slider
+                    value={[state.wobble]}
+                    min={0}
+                    max={100}
+                    onValueChange={([v]) => setState({ ...state, wobble: v })}
+                />
+            </div>
+            <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium">Wobble Speed</span>
+                <Slider
+                    value={[state.wobbleSpeed]}
+                    min={0}
+                    max={100}
+                    onValueChange={([v]) => setState({ ...state, wobbleSpeed: v })}
+                />
+            </div>
         </div>
     );
 
