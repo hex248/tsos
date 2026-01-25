@@ -3,22 +3,10 @@ import ColorKeyboard from "@/components/controls/ColorKeyboard";
 import OctaveSelector from "@/components/controls/OctaveSelector";
 import PresetSelector from "@/components/controls/PresetSelector";
 import { Slider } from "@/components/ui/slider";
-import { Toggle } from "@/components/ui/toggle";
-import { colorScale, noteToFrequency } from "@/constants/colorScale";
-import { useAudioContext } from "@/hooks/useAudioContext";
+import { colorScale } from "@/constants/colorScale";
 import { useShapeState } from "@/hooks/useShapeState";
-import { useSynth } from "@/hooks/useSynth";
-import { useWobbleAnimation } from "@/hooks/useWobbleAnimation";
-import {
-    mapGrainToNoise,
-    mapPresetToOscType,
-    mapRoundnessToFade,
-    mapSizeToGain,
-    mapWobbleToDetune,
-} from "@/lib/audio/mapping";
-import { playPreviewSample } from "@/lib/audio/synth";
-import { useEffect, useState } from "react";
-import * as Tone from "tone";
+import { type PreviewVoice, playPreviewSample, startPreviewVoice, stopPreviewVoice } from "@/lib/audio/synth";
+import { useEffect, useRef, useState } from "react";
 import Layout from "./Layout";
 import { cn } from "./lib/utils";
 
@@ -100,45 +88,21 @@ function Index() {
     const centerY = dimensions.height / 2;
 
     const [state, setState] = useShapeState(centerX, centerY);
-    const { isMuted, toggleMute } = useAudioContext();
-    const synthRef = useSynth();
-    const pitchTime = useWobbleAnimation(state.wobbleSpeed);
+    const activeVoicesRef = useRef<Map<string, { voice: PreviewVoice | null; keys: Set<string> }>>(new Map());
+    const keyToNoteRef = useRef<Map<string, string>>(new Map());
 
     useEffect(() => {
-        if (!synthRef.current) return;
+        const stopAllVoices = () => {
+            const entries = Array.from(activeVoicesRef.current.values());
+            activeVoicesRef.current.clear();
+            keyToNoteRef.current.clear();
+            for (const entry of entries) {
+                if (entry.voice) {
+                    stopPreviewVoice(entry.voice, null);
+                }
+            }
+        };
 
-        const nodes = synthRef.current;
-        nodes.oscillatorA.type = mapPresetToOscType(state.preset);
-        nodes.crossFade.fade.value = mapRoundnessToFade(state.roundness);
-        nodes.gain.gain.value = Tone.dbToGain(mapSizeToGain(state.size));
-        const detuneDepth = mapWobbleToDetune(state.wobble);
-        const detune = Math.sin(pitchTime * Math.PI * 2) * detuneDepth;
-        nodes.oscillatorA.detune.value = detune;
-        nodes.oscillatorB.detune.value = detune;
-
-        const note =
-            colorScale.find((entry) => entry.color.toLowerCase() === state.color.toLowerCase())?.note ??
-            colorScale[0].note;
-        const frequency = noteToFrequency(note, state.octave);
-        nodes.oscillatorA.frequency.value = frequency;
-        nodes.oscillatorB.frequency.value = frequency;
-
-        const grain = mapGrainToNoise(state.grain);
-        const noiseDb = grain === 0 ? Number.NEGATIVE_INFINITY : -40 + (-12 - -40) * grain;
-        nodes.noise.volume.value = noiseDb;
-    }, [
-        state.preset,
-        state.roundness,
-        state.size,
-        state.wobble,
-        state.grain,
-        state.color,
-        state.octave,
-        synthRef,
-        pitchTime,
-    ]);
-
-    useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) {
                 return;
@@ -165,18 +129,37 @@ function Index() {
 
             setState((prev) => {
                 const targetOctave = clampOctave(prev.octave + binding.octaveOffset);
-                console.log(`${binding.note + targetOctave} ${prev.octave} + ${binding.octaveOffset}`);
                 const color = COLOR_BY_NOTE.get(binding.note) ?? prev.color;
+                const noteKey = `${binding.note}${targetOctave}`;
 
-                void playPreviewSample({
-                    preset: prev.preset,
-                    roundness: prev.roundness,
-                    size: prev.size,
-                    grain: prev.grain,
-                    note: binding.note,
-                    octave: targetOctave,
-                    synthNodes: synthRef.current,
-                });
+                keyToNoteRef.current.set(normalizedKey, noteKey);
+                const existingEntry = activeVoicesRef.current.get(noteKey);
+                if (existingEntry) {
+                    existingEntry.keys.add(normalizedKey);
+                } else {
+                    activeVoicesRef.current.set(noteKey, { voice: null, keys: new Set([normalizedKey]) });
+                    void startPreviewVoice({
+                        preset: prev.preset,
+                        roundness: prev.roundness,
+                        size: prev.size,
+                        grain: prev.grain,
+                        note: binding.note,
+                        octave: targetOctave,
+                        synthNodes: null,
+                    }).then((voice) => {
+                        const entry = activeVoicesRef.current.get(noteKey);
+                        if (!entry) {
+                            stopPreviewVoice(voice, null);
+                            return;
+                        }
+
+                        entry.voice = voice;
+                        if (entry.keys.size === 0) {
+                            activeVoicesRef.current.delete(noteKey);
+                            stopPreviewVoice(voice, null);
+                        }
+                    });
+                }
 
                 return {
                     ...prev,
@@ -185,18 +168,41 @@ function Index() {
             });
         };
 
+        const handleKeyUp = (event: KeyboardEvent) => {
+            const normalizedKey = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+            const noteKey = keyToNoteRef.current.get(normalizedKey);
+            if (!noteKey) {
+                return;
+            }
+
+            keyToNoteRef.current.delete(normalizedKey);
+            const entry = activeVoicesRef.current.get(noteKey);
+            if (!entry) {
+                return;
+            }
+
+            entry.keys.delete(normalizedKey);
+            if (entry.keys.size === 0) {
+                activeVoicesRef.current.delete(noteKey);
+                if (entry.voice) {
+                    stopPreviewVoice(entry.voice, null);
+                }
+            }
+        };
+
         window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [setState, synthRef]);
+        window.addEventListener("keyup", handleKeyUp);
+        window.addEventListener("blur", stopAllVoices);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("keyup", handleKeyUp);
+            window.removeEventListener("blur", stopAllVoices);
+            stopAllVoices();
+        };
+    }, [setState]);
 
     const sidebarContent = (
         <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">Audio</span>
-                <Toggle pressed={!isMuted} onPressedChange={toggleMute} variant="outline">
-                    {isMuted ? "Unmute" : "Mute"}
-                </Toggle>
-            </div>
             <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium">Shape</span>
                 <PresetSelector value={state.preset} onChange={(preset) => setState({ ...state, preset })} />
@@ -217,7 +223,7 @@ function Index() {
                             grain: state.grain,
                             note,
                             octave: state.octave,
-                            synthNodes: synthRef.current,
+                            synthNodes: null,
                         });
 
                         setState({ ...state, color });
