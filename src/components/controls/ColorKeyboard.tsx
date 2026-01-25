@@ -52,7 +52,10 @@ export default function ColorKeyboard({
                                           backgroundColor: ["D", "E"].includes(note) ? "#000000" : "#ffffff",
                                           color: ["D", "E"].includes(note) ? "#ffffff" : "#000000",
                                       }
-                                    : { backgroundColor: color }
+                                    : {
+                                          backgroundColor: color,
+                                          color: ["D", "E"].includes(note) ? "#000000" : "#ffffff",
+                                      }
                             }
                         >
                             {note}

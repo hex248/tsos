@@ -16,6 +16,7 @@ import {
     mapSizeToGain,
     mapWobbleToDetune,
 } from "@/lib/audio/mapping";
+import { playPreviewSample } from "@/lib/audio/synth";
 import { useEffect, useState } from "react";
 import * as Tone from "tone";
 import Layout from "./Layout";
@@ -95,7 +96,26 @@ function Index() {
             </div>
             <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium">Note/Colour</span>
-                <ColorKeyboard value={state.color} onChange={(color) => setState({ ...state, color })} />
+                <ColorKeyboard
+                    value={state.color}
+                    onChange={(color) => {
+                        const note =
+                            colorScale.find((entry) => entry.color.toLowerCase() === color.toLowerCase())
+                                ?.note ?? colorScale[0].note;
+
+                        void playPreviewSample({
+                            preset: state.preset,
+                            roundness: state.roundness,
+                            size: state.size,
+                            grain: state.grain,
+                            note,
+                            octave: state.octave,
+                            synthNodes: synthRef.current,
+                        });
+
+                        setState({ ...state, color });
+                    }}
+                />
             </div>
             <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium">Octave</span>
