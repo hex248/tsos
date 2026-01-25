@@ -1,8 +1,13 @@
 import ShapeCanvas from "@/components/canvas/ShapeCanvas";
 import PresetSelector from "@/components/controls/PresetSelector";
 import { Slider } from "@/components/ui/slider";
+import { Toggle } from "@/components/ui/toggle";
+import { useAudioContext } from "@/hooks/useAudioContext";
 import { useShapeState } from "@/hooks/useShapeState";
+import { useSynth } from "@/hooks/useSynth";
+import { mapGrainToNoise, mapPresetToOscType, mapRoundnessToFade, mapSizeToGain } from "@/lib/audio/mapping";
 import { useEffect, useState } from "react";
+import * as Tone from "tone";
 import Layout from "./Layout";
 import { cn } from "./lib/utils";
 
@@ -28,9 +33,30 @@ function Index() {
     const centerY = dimensions.height / 2;
 
     const [state, setState] = useShapeState(centerX, centerY);
+    const { isMuted, toggleMute } = useAudioContext();
+    const synthRef = useSynth();
+
+    useEffect(() => {
+        if (!synthRef.current) return;
+
+        const nodes = synthRef.current;
+        nodes.oscillatorA.type = mapPresetToOscType(state.preset);
+        nodes.crossFade.fade.value = mapRoundnessToFade(state.roundness);
+        nodes.gain.gain.value = Tone.dbToGain(mapSizeToGain(state.size));
+
+        const grain = mapGrainToNoise(state.grain);
+        const noiseDb = grain === 0 ? Number.NEGATIVE_INFINITY : -40 + (-12 - -40) * grain;
+        nodes.noise.volume.value = noiseDb;
+    }, [state.preset, state.roundness, state.size, state.grain, synthRef]);
 
     const sidebarContent = (
         <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium">Audio</span>
+                <Toggle pressed={!isMuted} onPressedChange={toggleMute} variant="outline">
+                    {isMuted ? "Unmute" : "Mute"}
+                </Toggle>
+            </div>
             <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium">Shape</span>
                 <PresetSelector value={state.preset} onChange={(preset) => setState({ ...state, preset })} />
@@ -77,6 +103,15 @@ function Index() {
                     min={0}
                     max={100}
                     onValueChange={([v]) => setState({ ...state, wobbleRandomness: v })}
+                />
+            </div>
+            <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium">Noise</span>
+                <Slider
+                    value={[state.grain]}
+                    min={0}
+                    max={100}
+                    onValueChange={([v]) => setState({ ...state, grain: v })}
                 />
             </div>
         </div>
