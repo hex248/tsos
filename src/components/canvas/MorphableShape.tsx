@@ -46,9 +46,10 @@ export default function MorphableShape({
 
     const flatPoints = useMemo(() => {
         const wobbleAmount = state.wobble * 0.3; // scale wobble to reasonable range
-        const wobbled = applyWobble(morphedPoints, time, wobbleAmount);
+        const randomness = state.wobbleRandomness / 100;
+        const wobbled = applyWobble(morphedPoints, time, wobbleAmount, randomness);
         return wobbled.flatMap((p) => [p.x, p.y]);
-    }, [morphedPoints, time, state.wobble]);
+    }, [morphedPoints, time, state.wobble, state.wobbleRandomness]);
 
     return (
         <Group x={state.x} y={state.y} draggable onDragMove={handleDrag}>

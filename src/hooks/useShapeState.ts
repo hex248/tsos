@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
 import type { ShapeState } from "@/types/shape";
+import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_STATE: ShapeState = {
     x: 0,
@@ -9,6 +9,7 @@ const DEFAULT_STATE: ShapeState = {
     size: 50, // medium
     wobble: 20, // subtle
     wobbleSpeed: 50, // medium
+    wobbleRandomness: 50, // medium
     grain: 0, // none
     color: "#FF0000", // red (C)
     octave: 4, // middle octave
@@ -26,6 +27,7 @@ export function useShapeState(centerX: number, centerY: number) {
         x: centerX,
         y: centerY,
     });
+    void initialStateRef;
 
     // update center position when canvas resizes
     useEffect(() => {

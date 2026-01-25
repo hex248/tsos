@@ -8,6 +8,7 @@ export interface ShapeState {
     size: number; // 0-100, controls volume
     wobble: number; // 0-100, visual wobble amount
     wobbleSpeed: number; // 0-100, wobble animation speed
+    wobbleRandomness: number; // 0-100, noise vs sine blend
     grain: number; // 0-100, noise mix
     color: string; // hex color from clavier keyboard
     octave: number; // 1-8, frequency multiplier
