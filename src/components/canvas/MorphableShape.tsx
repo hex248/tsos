@@ -7,8 +7,7 @@ import type { KonvaEventObject } from "konva/lib/Node";
 import { useMemo } from "react";
 import { Group, Line } from "react-konva";
 
-const SHAPE_RADIUS = 100;
-const NUM_POINTS = 64;
+const NUM_POINTS = 256;
 
 export default function MorphableShape({
     state,
@@ -27,22 +26,25 @@ export default function MorphableShape({
         });
     };
 
+    // Map size (0-100) to radius (20-200)
+    const radius = 20 + (state.size / 100) * 180;
+
     const morphedPoints = useMemo(() => {
         const presetPoints = (() => {
             switch (state.preset) {
                 case "triangle":
-                    return generateTrianglePoints(0, 0, SHAPE_RADIUS, NUM_POINTS);
+                    return generateTrianglePoints(0, 0, radius, NUM_POINTS);
                 case "square":
-                    return generateSquarePoints(0, 0, SHAPE_RADIUS, NUM_POINTS);
+                    return generateSquarePoints(0, 0, radius, NUM_POINTS);
                 case "circle":
-                    return generateCirclePoints(0, 0, SHAPE_RADIUS, NUM_POINTS);
+                    return generateCirclePoints(0, 0, radius, NUM_POINTS);
             }
         })();
 
-        const circlePoints = generateCirclePoints(0, 0, SHAPE_RADIUS, NUM_POINTS);
+        const circlePoints = generateCirclePoints(0, 0, radius, NUM_POINTS);
         const t = state.roundness / 100;
         return morphPoints(presetPoints, circlePoints, t);
-    }, [state.preset, state.roundness]);
+    }, [state.preset, state.roundness, radius]);
 
     const flatPoints = useMemo(() => {
         const wobbleAmount = state.wobble * 0.3; // scale wobble to reasonable range

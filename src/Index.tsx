@@ -235,6 +235,15 @@ function Index() {
                 <OctaveSelector value={state.octave} onChange={(octave) => setState({ ...state, octave })} />
             </div>
             <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium">Size</span>
+                <Slider
+                    value={[state.size]}
+                    min={0}
+                    max={100}
+                    onValueChange={([v]) => setState({ ...state, size: v })}
+                />
+            </div>
+            <div className="flex flex-col gap-2">
                 <span
                     className={cn(
                         "text-sm font-medium",
