@@ -261,7 +261,10 @@ function Index() {
                 />
             </div>
             <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">Wobble</span>
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">Wobble</span>
+                    <span className="text-xs text-muted-foreground">(currently only visual)</span>
+                </div>
                 <Slider
                     value={[state.wobble]}
                     min={0}
@@ -270,7 +273,10 @@ function Index() {
                 />
             </div>
             <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">Wobble Speed</span>
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">Wobble Speed</span>
+                    <span className="text-xs text-muted-foreground">(currently only visual)</span>
+                </div>
                 <Slider
                     value={[state.wobbleSpeed]}
                     min={0}
@@ -279,7 +285,10 @@ function Index() {
                 />
             </div>
             <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">Wobble Randomness</span>
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">Wobble Randomness</span>
+                    <span className="text-xs text-muted-foreground">(currently only visual)</span>
+                </div>
                 <Slider
                     value={[state.wobbleRandomness]}
                     min={0}
