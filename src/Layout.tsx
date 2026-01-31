@@ -1,14 +1,7 @@
 import AudioWaveform from "@/components/AudioWaveform";
 import ThemeToggle from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Clock, Home, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -98,6 +91,20 @@ export default function Layout({
                                     roundness, and wobble by dragging, giving tactile control over the
                                     sound-visual relationship. This will make the sound design more intuitive
                                     and engaging.
+                                </p>
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="font-medium">Key Selection</h4>
+                                <p className="text-sm text-muted-foreground">
+                                    Allow users to select a musical key (e.g. C Major, A Minor) so the
+                                    keyboard will follow a key, making it easier to create succinct melodies.
+                                </p>
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="font-medium">Export Sound</h4>
+                                <p className="text-sm text-muted-foreground">
+                                    Users will be able to export their generated sounds as .wav or .mp3. This
+                                    can then be sampled into other audio software or used in projects.
                                 </p>
                             </div>
                         </div>
