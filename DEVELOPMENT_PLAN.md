@@ -153,10 +153,10 @@ src/
 - [x] Create `lib/noise.ts` - export shared simplex instance
 - [x] Create `lib/shapes/wobble.ts`:
   - `applyWobble(points, time, amount, noiseScale)` - displace points using noise
-- [ ] Create `useWobbleAnimation.ts` - RAF loop, tracks elapsed time
-- [ ] Update `MorphableShape.tsx` to apply wobble each frame
-- [ ] Add wobble amount slider to sidebar
-- [ ] Add wobble speed slider to sidebar
+- [x] Create `useWobbleAnimation.ts` - RAF loop, tracks elapsed time
+- [x] Update `MorphableShape.tsx` to apply wobble each frame
+- [x] Add wobble amount slider to sidebar
+- [x] Add wobble speed slider to sidebar
 
 ### Deliverables
 
@@ -172,23 +172,22 @@ src/
 
 ### Tasks
 
-- [ ] Create `lib/audio/synth.ts`:
+- [x] Create `lib/audio/synth.ts`:
   - Dual oscillators (A = preset type, B = sine)
   - CrossFade node between them
   - Noise generator for grain
   - Master gain node
   - `createSynth()`, `disposeSynth()` functions
-- [ ] Create `useSynth.ts` - lifecycle management, returns synth controls
-- [ ] Create `useAudioContext.ts` - handles mute/unmute and Tone.start()
-- [ ] Create `lib/audio/mapping.ts`:
+- [x] Create `useSynth.ts` - lifecycle management, returns synth controls
+- [x] Create `useAudioContext.ts` - handles mute/unmute and Tone.start()
+- [x] Create `lib/audio/mapping.ts`:
   - `mapPresetToOscType(preset)` → 'sawtooth' | 'square' | 'sine'
   - `mapRoundnessToFade(roundness)` → 0-1
   - `mapSizeToGain(size)` → decibels
   - `mapGrainToNoise(grain)` → 0-1
-- [ ] Add mute/unmute toggle button to sidebar (or top bar)
-- [ ] Wire `preset` → oscillator A type
-- [ ] Wire `roundness` → crossfade
-- [ ] Wire `size` → gain
+- [x] Wire `preset` → oscillator A type
+- [x] Wire `roundness` → crossfade
+- [x] Wire `size` → gain
 
 ### Deliverables
 
@@ -205,20 +204,20 @@ src/
 
 ### Tasks
 
-- [ ] Create `constants/colorScale.ts`:
+- [x] Create `constants/colorScale.ts`:
   - Scriabin's color-note mapping (or custom)
   - Array of 12 `{ note, color, label }` objects
-- [ ] Create `lib/audio/colorToFrequency.ts`:
+- [x] Create `lib/audio/colorToFrequency.ts`:
   - `noteToFrequency(note, octave)` → Hz
   - `colorToNote(hue)` → nearest note
-- [ ] Create `ColorKeyboard.tsx`:
+- [x] Create `ColorKeyboard.tsx`:
   - 12 colored keys in a row
   - Click to select, shows current selection
-- [ ] Create `OctaveSelector.tsx`:
+- [x] Create `OctaveSelector.tsx`:
   - "-" button, octave number, "+" button
   - Range 1-8
-- [ ] Wire color + octave → oscillator frequency
-- [ ] Update shape fill color to match selected color
+- [x] Wire color + octave → oscillator frequency
+- [x] Update shape fill color to match selected color
 
 ### Deliverables
 
