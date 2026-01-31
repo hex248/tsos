@@ -1,7 +1,15 @@
 import AudioWaveform from "@/components/AudioWaveform";
 import ThemeToggle from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Home, Settings } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Clock, Home, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Layout({
@@ -48,7 +56,54 @@ export default function Layout({
             </div>
 
             {/* canvas area - flex-1 */}
-            <main className="flex-1 flex items-center justify-center bg-background">{children}</main>
+            <main className="flex-1 flex items-center justify-center bg-background relative">
+                {children}
+
+                {/* Coming Soon Button */}
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="absolute bottom-4 right-4 rounded-full px-4"
+                        >
+                            <Clock className="size-4 mr-1" />
+                            Coming Soon
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>Coming Soon</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-2">
+                            <div className="space-y-2">
+                                <h4 className="font-medium">Information Tooltips</h4>
+                                <p className="text-sm text-muted-foreground">
+                                    Will be displayed on each setting explaining what it does and how it
+                                    affects the sound.
+                                </p>
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="font-medium">Wobble Controls</h4>
+                                <p className="text-sm text-muted-foreground">
+                                    Wobble will modulate the pitch of the sound, adding vibrato and subtle
+                                    frequency variations for a more organic, "human" feel. The more "random"
+                                    the wobble, the more imperfect and natural-sounding it will be.
+                                </p>
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="font-medium">Physical Control Points</h4>
+                                <p className="text-sm text-muted-foreground">
+                                    Interactive handles on the shape that let you directly manipulate size,
+                                    roundness, and wobble by dragging, giving tactile control over the
+                                    sound-visual relationship. This will make the sound design more intuitive
+                                    and engaging.
+                                </p>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            </main>
         </div>
     );
 }
