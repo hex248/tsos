@@ -3,9 +3,11 @@ import ColorKeyboard from "@/components/controls/ColorKeyboard";
 import OctaveSelector from "@/components/controls/OctaveSelector";
 import PresetSelector from "@/components/controls/PresetSelector";
 import { Slider } from "@/components/ui/slider";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { colorScale } from "@/constants/colorScale";
 import { useShapeState } from "@/hooks/useShapeState";
 import { type PreviewVoice, playPreviewSample, startPreviewVoice, stopPreviewVoice } from "@/lib/audio/synth";
+import { Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Layout from "./Layout";
 import { cn } from "./lib/utils";
@@ -204,11 +206,37 @@ function Index() {
     const sidebarContent = (
         <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">Shape</span>
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">Shape</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                Selects the oscillator waveform. Square = pulse with odd harmonics, Circle =
+                                sine (pure tone), Triangle = sawtooth (all harmonics).
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
                 <PresetSelector value={state.preset} onChange={(preset) => setState({ ...state, preset })} />
             </div>
             <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">Note/Colour</span>
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">Note/Colour</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                Sets the fundamental frequency (f₀) from the 12-tone chromatic scale using
+                                equal temperament (A4 = 440Hz).
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
                 <ColorKeyboard
                     value={state.color}
                     onChange={(color) => {
@@ -231,11 +259,37 @@ function Index() {
                 />
             </div>
             <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">Octave</span>
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">Octave</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                Transposes frequency by octaves: f = f₀ × 2ⁿ. Doubles frequency per octave,
+                                shifting the entire harmonic series.
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
                 <OctaveSelector value={state.octave} onChange={(octave) => setState({ ...state, octave })} />
             </div>
             <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">Size</span>
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">Size</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                Controls gain/amplitude in dB. Affects signal level, RMS power, and loudness
+                                perception.
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
                 <Slider
                     value={[state.size]}
                     min={0}
@@ -244,14 +298,32 @@ function Index() {
                 />
             </div>
             <div className="flex flex-col gap-2">
-                <span
-                    className={cn(
-                        "text-sm font-medium",
-                        state.preset === "circle" ? "opacity-50 pointer-events-none select-none" : "",
-                    )}
-                >
-                    Roundness
-                </span>
+                <div className="flex items-center gap-1">
+                    <span
+                        className={cn(
+                            "text-sm font-medium",
+                            state.preset === "circle" ? "opacity-50 pointer-events-none select-none" : "",
+                        )}
+                    >
+                        Roundness
+                    </span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info
+                                className={cn(
+                                    "size-3.5 text-muted-foreground cursor-help",
+                                    state.preset === "circle" ? "opacity-50" : "",
+                                )}
+                            />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                Adjusts duty cycle ratio or wave crest factor, altering the balance between
+                                fundamental and harmonics.
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
                 <Slider
                     value={[state.roundness]}
                     min={0}
@@ -263,6 +335,17 @@ function Index() {
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">Wobble</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                LFO modulation depth in cents (±100 = ±1 semitone). Controls pitch deviation
+                                magnitude from FM synthesis.
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
                     <span className="text-xs text-muted-foreground">(currently only visual)</span>
                 </div>
                 <Slider
@@ -275,6 +358,17 @@ function Index() {
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">Wobble Speed</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                LFO frequency in Hz. Determines how many pitch modulation cycles occur per
+                                second.
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
                     <span className="text-xs text-muted-foreground">(currently only visual)</span>
                 </div>
                 <Slider
@@ -287,6 +381,17 @@ function Index() {
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">Wobble Randomness</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                Adds noise-based jitter to the LFO signal. Breaks periodicity for organic,
+                                non-mechanical modulation.
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
                     <span className="text-xs text-muted-foreground">(currently only visual)</span>
                 </div>
                 <Slider
