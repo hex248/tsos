@@ -1,6 +1,6 @@
 import type { ShapeState } from "@/types/shape";
 import type { ViewMode } from "@/types/viewMode";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type ControlKind = "size" | "roundness";
 
@@ -11,6 +11,22 @@ interface DragState {
     startValue: number;
     pointerId: number;
 }
+
+interface DragFeedback {
+    value: number;
+    delta: number;
+}
+
+const CONTROL_META: Record<ControlKind, { label: string; hint: string }> = {
+    size: {
+        label: "Size",
+        hint: "Drag up/right to increase",
+    },
+    roundness: {
+        label: "Roundness",
+        hint: "Drag up/right to increase",
+    },
+};
 
 function clampRange(value: number) {
     return Math.max(0, Math.min(100, value));
@@ -50,6 +66,10 @@ export default function ShapeDomControlPoints({
 }) {
     const stateRef = useRef(state);
     const dragStateRef = useRef<DragState | null>(null);
+    const [hoveredControl, setHoveredControl] = useState<ControlKind | null>(null);
+    const [focusedControl, setFocusedControl] = useState<ControlKind | null>(null);
+    const [activeControl, setActiveControl] = useState<ControlKind | null>(null);
+    const [dragFeedback, setDragFeedback] = useState<DragFeedback | null>(null);
 
     useEffect(() => {
         stateRef.current = state;
@@ -69,6 +89,12 @@ export default function ShapeDomControlPoints({
             const nextValue = drag.startValue + delta * sensitivity;
             const current = stateRef.current;
             const nextState = setControlValue(current, drag.control, nextValue);
+            const clampedValue = getControlValue(nextState, drag.control);
+
+            setDragFeedback({
+                value: clampedValue,
+                delta,
+            });
 
             if (getControlValue(current, drag.control) !== getControlValue(nextState, drag.control)) {
                 onStateChange(nextState);
@@ -77,6 +103,8 @@ export default function ShapeDomControlPoints({
 
         const handlePointerUp = () => {
             dragStateRef.current = null;
+            setActiveControl(null);
+            setDragFeedback(null);
         };
 
         window.addEventListener("pointermove", handlePointerMove);
@@ -120,50 +148,134 @@ export default function ShapeDomControlPoints({
     }
 
     return (
-        <div className="pointer-events-none absolute inset-0 z-20" aria-hidden="true">
+        <fieldset className="pointer-events-none absolute inset-0 z-20 m-0 border-0 p-0">
+            <legend className="sr-only">Shape control points</legend>
             {controls.map((control) => (
-                <button
+                <div
                     key={control.control}
-                    type="button"
-                    className="pointer-events-auto absolute size-5 rounded-full border border-white/60 shadow-sm"
+                    className="pointer-events-none absolute"
                     style={{
                         left: `${control.x}px`,
                         top: `${control.y}px`,
                         transform: "translate(-50%, -50%)",
-                        backgroundColor: control.color,
-                        opacity: control.disabled ? 0.4 : 1,
-                        cursor: control.disabled ? "not-allowed" : "grab",
                     }}
-                    disabled={control.disabled}
-                    onPointerDown={(event) => {
-                        if (control.disabled) {
-                            return;
+                >
+                    <button
+                        type="button"
+                        className="pointer-events-auto absolute size-5 rounded-full border border-white/60 shadow-sm focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                        style={{
+                            backgroundColor: control.color,
+                            opacity: control.disabled ? 0.4 : 1,
+                            cursor: control.disabled
+                                ? "not-allowed"
+                                : activeControl === control.control
+                                  ? "grabbing"
+                                  : "grab",
+                        }}
+                        disabled={control.disabled}
+                        aria-disabled={control.disabled}
+                        aria-label={`${CONTROL_META[control.control].label} control, ${Math.round(getControlValue(state, control.control))}%${control.disabled ? ", unavailable for circle preset" : ""}`}
+                        onPointerEnter={() => setHoveredControl(control.control)}
+                        onPointerLeave={() =>
+                            setHoveredControl((current) => (current === control.control ? null : current))
                         }
+                        onFocus={() => setFocusedControl(control.control)}
+                        onBlur={() =>
+                            setFocusedControl((current) => (current === control.control ? null : current))
+                        }
+                        onKeyDown={(event) => {
+                            if (control.disabled) {
+                                return;
+                            }
 
-                        event.preventDefault();
-                        event.stopPropagation();
-                        event.currentTarget.setPointerCapture(event.pointerId);
-                        dragStateRef.current = {
-                            control: control.control,
-                            startX: event.clientX,
-                            startY: event.clientY,
-                            startValue: getControlValue(stateRef.current, control.control),
-                            pointerId: event.pointerId,
-                        };
-                    }}
-                    onPointerUp={(event) => {
-                        const drag = dragStateRef.current;
-                        if (!drag) {
-                            return;
-                        }
+                            const step = event.shiftKey ? 10 : 2;
+                            let delta = 0;
+                            if (event.key === "ArrowUp" || event.key === "ArrowRight") {
+                                delta = step;
+                            } else if (event.key === "ArrowDown" || event.key === "ArrowLeft") {
+                                delta = -step;
+                            }
 
-                        if (event.currentTarget.hasPointerCapture(drag.pointerId)) {
-                            event.currentTarget.releasePointerCapture(drag.pointerId);
-                        }
-                        dragStateRef.current = null;
-                    }}
-                />
+                            if (delta === 0) {
+                                return;
+                            }
+
+                            event.preventDefault();
+                            const current = stateRef.current;
+                            const next = setControlValue(
+                                current,
+                                control.control,
+                                getControlValue(current, control.control) + delta,
+                            );
+                            onStateChange(next);
+                        }}
+                        onPointerDown={(event) => {
+                            if (control.disabled) {
+                                return;
+                            }
+
+                            event.preventDefault();
+                            event.stopPropagation();
+                            event.currentTarget.setPointerCapture(event.pointerId);
+
+                            const startValue = getControlValue(stateRef.current, control.control);
+                            dragStateRef.current = {
+                                control: control.control,
+                                startX: event.clientX,
+                                startY: event.clientY,
+                                startValue,
+                                pointerId: event.pointerId,
+                            };
+                            setActiveControl(control.control);
+                            setDragFeedback({ value: startValue, delta: 0 });
+                        }}
+                        onPointerUp={(event) => {
+                            const drag = dragStateRef.current;
+                            if (!drag) {
+                                return;
+                            }
+
+                            if (event.currentTarget.hasPointerCapture(drag.pointerId)) {
+                                event.currentTarget.releasePointerCapture(drag.pointerId);
+                            }
+                            dragStateRef.current = null;
+                            setActiveControl(null);
+                            setDragFeedback(null);
+                        }}
+                    />
+
+                    {hoveredControl === control.control ||
+                    focusedControl === control.control ||
+                    activeControl === control.control ? (
+                        <div className="pointer-events-none absolute -top-14 left-1/2 -translate-x-1/2 rounded-md border border-border/70 bg-background/95 px-2 py-1 text-[11px] leading-tight text-foreground shadow-sm whitespace-nowrap">
+                            <div className="font-medium">{CONTROL_META[control.control].label}</div>
+                            {control.disabled ? (
+                                <div className="text-muted-foreground">Unavailable for circle preset</div>
+                            ) : (
+                                <>
+                                    <div>
+                                        {Math.round(
+                                            activeControl === control.control && dragFeedback
+                                                ? dragFeedback.value
+                                                : getControlValue(state, control.control),
+                                        )}
+                                        %
+                                    </div>
+                                    <div className="text-muted-foreground">
+                                        {CONTROL_META[control.control].hint}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ) : null}
+                </div>
             ))}
-        </div>
+
+            <div className="sr-only" aria-live="polite">
+                {activeControl && dragFeedback
+                    ? `${CONTROL_META[activeControl].label} ${Math.round(dragFeedback.value)} percent`
+                    : ""}
+            </div>
+        </fieldset>
     );
 }
