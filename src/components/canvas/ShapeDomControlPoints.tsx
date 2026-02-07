@@ -158,11 +158,17 @@ export default function ShapeDomControlPoints({
                         left: `${control.x}px`,
                         top: `${control.y}px`,
                         transform: "translate(-50%, -50%)",
+                        zIndex:
+                            hoveredControl === control.control ||
+                            focusedControl === control.control ||
+                            activeControl === control.control
+                                ? 30
+                                : 10,
                     }}
                 >
                     <button
                         type="button"
-                        className="pointer-events-auto absolute size-5 rounded-full border border-white/60 shadow-sm focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                        className="pointer-events-auto absolute z-20 size-5 rounded-full border border-white/60 shadow-sm focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
                         style={{
                             backgroundColor: control.color,
                             opacity: control.disabled ? 0.4 : 1,
@@ -247,7 +253,7 @@ export default function ShapeDomControlPoints({
                     {hoveredControl === control.control ||
                     focusedControl === control.control ||
                     activeControl === control.control ? (
-                        <div className="pointer-events-none absolute -top-14 left-1/2 -translate-x-1/2 rounded-md border border-border/70 bg-background/95 px-2 py-1 text-[11px] leading-tight text-foreground shadow-sm whitespace-nowrap">
+                        <div className="pointer-events-none absolute z-30 -top-14 left-1/2 -translate-x-1/2 rounded-md border border-border/70 bg-background/95 px-2 py-1 text-[11px] leading-tight text-foreground shadow-sm whitespace-nowrap">
                             <div className="font-medium">{CONTROL_META[control.control].label}</div>
                             {control.disabled ? (
                                 <div className="text-muted-foreground">Unavailable for circle preset</div>
