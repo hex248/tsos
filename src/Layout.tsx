@@ -70,13 +70,6 @@ export default function Layout({
                         </DialogHeader>
                         <div className="space-y-4 py-2">
                             <div className="space-y-2">
-                                <h4 className="font-medium">Information Tooltips</h4>
-                                <p className="text-sm text-muted-foreground">
-                                    Will be displayed on each setting explaining what it does and how it
-                                    affects the sound.
-                                </p>
-                            </div>
-                            <div className="space-y-2">
                                 <h4 className="font-medium">Wobble Controls</h4>
                                 <p className="text-sm text-muted-foreground">
                                     Wobble will modulate the pitch of the sound, adding vibrato and subtle
