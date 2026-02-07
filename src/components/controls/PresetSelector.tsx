@@ -4,7 +4,6 @@ import type { Preset } from "@/types/shape";
 const presets: { value: Preset; label: string }[] = [
     { value: "triangle", label: "Triangle" },
     { value: "square", label: "Square" },
-    { value: "circle", label: "Circle" },
 ];
 
 export default function PresetSelector({

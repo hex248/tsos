@@ -1,10 +1,10 @@
-export type Preset = "triangle" | "square" | "circle";
+export type Preset = "triangle" | "square";
 
 export interface ShapeState {
     x: number;
     y: number;
     preset: Preset;
-    roundness: number; // 0-100, controls morph from preset to circle
+    roundness: number; // 0-100, controls morph from sharp to round
     size: number; // 0-100, controls volume
     wobble: number; // 0-100, visual wobble amount
     wobbleSpeed: number; // 0-100, wobble animation speed

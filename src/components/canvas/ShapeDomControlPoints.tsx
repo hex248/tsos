@@ -137,10 +137,10 @@ export default function ShapeDomControlPoints({
                 x: shapeX,
                 y: shapeY - handleDistance,
                 color: "#93C5FD",
-                disabled: state.preset === "circle",
+                disabled: false,
             },
         ],
-        [shapeX, shapeY, handleDistance, state.preset],
+        [shapeX, shapeY, handleDistance],
     );
 
     if (mode !== "edit") {
@@ -180,7 +180,7 @@ export default function ShapeDomControlPoints({
                         }}
                         disabled={control.disabled}
                         aria-disabled={control.disabled}
-                        aria-label={`${CONTROL_META[control.control].label} control, ${Math.round(getControlValue(state, control.control))}%${control.disabled ? ", unavailable for circle preset" : ""}`}
+                        aria-label={`${CONTROL_META[control.control].label} control, ${Math.round(getControlValue(state, control.control))}%`}
                         onPointerEnter={() => setHoveredControl(control.control)}
                         onPointerLeave={() =>
                             setHoveredControl((current) => (current === control.control ? null : current))
@@ -259,23 +259,19 @@ export default function ShapeDomControlPoints({
                     activeControl === control.control ? (
                         <div className="pointer-events-none absolute z-30 -top-14 left-1/2 -translate-x-1/2 rounded-md border border-border/70 bg-background/95 px-2 py-1 text-[11px] leading-tight text-foreground shadow-sm whitespace-nowrap">
                             <div className="font-medium">{CONTROL_META[control.control].label}</div>
-                            {control.disabled ? (
-                                <div className="text-muted-foreground">Unavailable for circle preset</div>
-                            ) : (
-                                <>
-                                    <div>
-                                        {Math.round(
-                                            activeControl === control.control && dragFeedback
-                                                ? dragFeedback.value
-                                                : getControlValue(state, control.control),
-                                        )}
-                                        %
-                                    </div>
-                                    <div className="text-muted-foreground">
-                                        {CONTROL_META[control.control].hint}
-                                    </div>
-                                </>
-                            )}
+                            <>
+                                <div>
+                                    {Math.round(
+                                        activeControl === control.control && dragFeedback
+                                            ? dragFeedback.value
+                                            : getControlValue(state, control.control),
+                                    )}
+                                    %
+                                </div>
+                                <div className="text-muted-foreground">
+                                    {CONTROL_META[control.control].hint}
+                                </div>
+                            </>
                         </div>
                     ) : null}
                 </div>

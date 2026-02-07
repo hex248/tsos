@@ -1,13 +1,11 @@
 import type { Preset } from "@/types/shape";
 
-export function mapPresetToOscType(preset: Preset): "sawtooth" | "square" | "sine" {
+export function mapPresetToOscType(preset: Preset): "sawtooth" | "square" {
     switch (preset) {
         case "triangle":
             return "sawtooth";
         case "square":
             return "square";
-        case "circle":
-            return "sine";
     }
 }
 

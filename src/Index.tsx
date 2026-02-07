@@ -12,7 +12,6 @@ import type { ViewMode } from "@/types/viewMode";
 import { Info } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Layout from "./Layout";
-import { cn } from "./lib/utils";
 
 const KEY_NOTE_BINDINGS = [
     { key: "z", note: "C", octaveOffset: -1 },
@@ -269,8 +268,8 @@ function Index() {
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>
-                                Selects the oscillator waveform. Square = pulse with odd harmonics, Circle =
-                                sine (pure tone), Triangle = sawtooth (all harmonics).
+                                The oscillator waveform. Square = square wave, Triangle = sawtooth. Use
+                                Roundness to morph toward a smoother tone (sine wave).
                             </p>
                         </TooltipContent>
                     </Tooltip>
@@ -280,17 +279,6 @@ function Index() {
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">Note/Colour</span>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>
-                                Sets the fundamental frequency (f₀) from the 12-tone chromatic scale using
-                                equal temperament (A4 = 440Hz).
-                            </p>
-                        </TooltipContent>
-                    </Tooltip>
                 </div>
                 <ColorKeyboard
                     value={state.color}
@@ -354,22 +342,10 @@ function Index() {
             </div>
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
-                    <span
-                        className={cn(
-                            "text-sm font-medium",
-                            state.preset === "circle" ? "opacity-50 pointer-events-none select-none" : "",
-                        )}
-                    >
-                        Roundness
-                    </span>
+                    <span className="text-sm font-medium">Roundness</span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Info
-                                className={cn(
-                                    "size-3.5 text-muted-foreground cursor-help",
-                                    state.preset === "circle" ? "opacity-50" : "",
-                                )}
-                            />
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>
@@ -384,7 +360,6 @@ function Index() {
                     min={0}
                     max={100}
                     onValueChange={([v]) => setState({ ...state, roundness: v })}
-                    className={state.preset === "circle" ? "opacity-50 pointer-events-none" : ""}
                 />
             </div>
             <div className="flex flex-col gap-2">

@@ -29,16 +29,10 @@ export default function MorphableShape({
     const radius = 20 + (state.size / 100) * 180;
 
     const morphedPoints = useMemo(() => {
-        const presetPoints = (() => {
-            switch (state.preset) {
-                case "triangle":
-                    return generateTrianglePoints(0, 0, radius, NUM_POINTS);
-                case "square":
-                    return generateSquarePoints(0, 0, radius, NUM_POINTS);
-                case "circle":
-                    return generateCirclePoints(0, 0, radius, NUM_POINTS);
-            }
-        })();
+        const presetPoints =
+            state.preset === "triangle"
+                ? generateTrianglePoints(0, 0, radius, NUM_POINTS)
+                : generateSquarePoints(0, 0, radius, NUM_POINTS);
 
         const circlePoints = generateCirclePoints(0, 0, radius, NUM_POINTS);
         const t = state.roundness / 100;
