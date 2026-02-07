@@ -1,8 +1,10 @@
+import { screenToWorld } from "@/lib/canvas/coordinates";
 import type { ShapeState } from "@/types/shape";
 import { Canvas, useThree } from "@react-three/fiber";
-import { useEffect, useState } from "react";
-import { OrthographicCamera } from "three";
+import { useEffect, useMemo, useState } from "react";
+import { OrthographicCamera, Vector3 } from "three";
 import MorphableShape from "./MorphableShape";
+import ShapeOrbitControls from "./ShapeOrbitControls";
 import ShapeSceneLighting from "./ShapeSceneLighting";
 
 function getDimensions() {
@@ -32,10 +34,8 @@ function CameraSync({ width, height }: { width: number; height: number }) {
 
 export default function ShapeCanvas({
     state,
-    onStateChange,
 }: {
     state: ShapeState;
-    onStateChange: (state: ShapeState) => void;
 }) {
     const [dimensions, setDimensions] = useState(getDimensions);
 
@@ -47,6 +47,11 @@ export default function ShapeCanvas({
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
+    const orbitTarget = useMemo(() => {
+        const world = screenToWorld(state.x, state.y, dimensions.width, dimensions.height);
+        return new Vector3(world.x, world.y, 0);
+    }, [state.x, state.y, dimensions.width, dimensions.height]);
 
     return (
         <div
@@ -62,12 +67,8 @@ export default function ShapeCanvas({
             >
                 <CameraSync width={dimensions.width} height={dimensions.height} />
                 <ShapeSceneLighting />
-                <MorphableShape
-                    state={state}
-                    onStateChange={onStateChange}
-                    width={dimensions.width}
-                    height={dimensions.height}
-                />
+                <ShapeOrbitControls target={orbitTarget} />
+                <MorphableShape state={state} width={dimensions.width} height={dimensions.height} />
             </Canvas>
         </div>
     );

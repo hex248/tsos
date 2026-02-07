@@ -6,18 +6,15 @@ import { generateCirclePoints, generateSquarePoints, generateTrianglePoints } fr
 import { applyWobble } from "@/lib/shapes/wobble";
 import type { ShapeState } from "@/types/shape";
 import { useEffect, useMemo } from "react";
-import { useShapeDrag3D } from "./useShapeDrag3D";
 
 const NUM_POINTS = 512;
 
 export default function MorphableShape({
     state,
-    onStateChange,
     width,
     height,
 }: {
     state: ShapeState;
-    onStateChange: (state: ShapeState) => void;
     width: number;
     height: number;
 }) {
@@ -69,13 +66,6 @@ export default function MorphableShape({
         return () => geometry.dispose();
     }, [geometry]);
 
-    const dragHandlers = useShapeDrag3D({
-        width,
-        height,
-        state,
-        onStateChange,
-    });
-
     const world = screenToWorld(state.x, state.y, width, height);
 
     return (
@@ -85,10 +75,6 @@ export default function MorphableShape({
             rotation={[0.62, -0.52, 0.14]}
             castShadow
             receiveShadow
-            onPointerDown={dragHandlers.handlePointerDown}
-            onPointerMove={dragHandlers.handlePointerMove}
-            onPointerUp={dragHandlers.handlePointerUp}
-            onPointerCancel={dragHandlers.handlePointerCancel}
         >
             <meshPhysicalMaterial
                 color={state.color}

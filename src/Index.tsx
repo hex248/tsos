@@ -406,7 +406,7 @@ function Index() {
 
     return (
         <Layout sidebarContent={sidebarContent} waveformColor={state.color}>
-            <ShapeCanvas state={state} onStateChange={setState} />
+            <ShapeCanvas state={state} />
         </Layout>
     );
 }
