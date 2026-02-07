@@ -84,15 +84,6 @@ export default function Layout({
                                 </p>
                             </div>
                             <div className="space-y-2">
-                                <h4 className="font-medium">Physical Control Points</h4>
-                                <p className="text-sm text-muted-foreground">
-                                    Interactive handles on the shape that let you directly manipulate size,
-                                    roundness, and wobble by dragging, giving tactile control over the
-                                    sound-visual relationship. This will make the sound design more intuitive
-                                    and engaging.
-                                </p>
-                            </div>
-                            <div className="space-y-2">
                                 <h4 className="font-medium">Key Selection</h4>
                                 <p className="text-sm text-muted-foreground">
                                     Allow users to select a musical key (e.g. C Major, A Minor) so the
