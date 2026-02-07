@@ -5,9 +5,9 @@ const DEFAULT_STATE: ShapeState = {
     x: 0,
     y: 0,
     preset: "square",
-    roundness: 15, // full circle
+    roundness: 0,
     size: 50, // medium
-    wobble: 20, // subtle
+    wobble: 0,
     wobbleSpeed: 50, // medium
     wobbleRandomness: 50, // medium
     grain: 0, // none

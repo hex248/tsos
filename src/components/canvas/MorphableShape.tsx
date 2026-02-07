@@ -51,9 +51,31 @@ export default function MorphableShape({
         return applyWobble(morphedPoints, time, wobbleAmount, randomness);
     }, [morphedPoints, time, state.wobble, state.wobbleRandomness]);
 
-    const roundnessT = state.roundness / 100;
-    const depthScale = state.preset === "circle" ? 2 : 1.5 + 0.5 * roundnessT;
-    const depth = Math.max(radius * depthScale, 60);
+    const depth = useMemo(() => {
+        let minX = Number.POSITIVE_INFINITY;
+        let maxX = Number.NEGATIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let maxY = Number.NEGATIVE_INFINITY;
+
+        for (const point of morphedPoints) {
+            if (point.x < minX) {
+                minX = point.x;
+            }
+            if (point.x > maxX) {
+                maxX = point.x;
+            }
+            if (point.y < minY) {
+                minY = point.y;
+            }
+            if (point.y > maxY) {
+                maxY = point.y;
+            }
+        }
+
+        const width = maxX - minX;
+        const height = maxY - minY;
+        return Math.max((width + height) / 2, 1);
+    }, [morphedPoints]);
 
     const geometry = useMemo(
         () =>
