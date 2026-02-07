@@ -46,7 +46,9 @@ export default function MorphableShape({
         return applyWobble(morphedPoints, time, wobbleAmount, randomness);
     }, [morphedPoints, time, state.wobble, state.wobbleRandomness]);
 
-    const depth = Math.max(radius * 1.5, 60);
+    const roundnessT = state.roundness / 100;
+    const depthScale = state.preset === "circle" ? 2 : 1.5 + 0.5 * roundnessT;
+    const depth = Math.max(radius * depthScale, 60);
 
     const geometry = useMemo(
         () =>
