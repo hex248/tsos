@@ -9,10 +9,12 @@ export default function Layout({
     children,
     sidebarContent,
     waveformColor,
+    viewportLeftOverlay,
 }: {
     children: React.ReactNode;
     sidebarContent?: React.ReactNode;
     waveformColor?: string;
+    viewportLeftOverlay?: React.ReactNode;
 }) {
     const location = useLocation();
 
@@ -51,6 +53,10 @@ export default function Layout({
             {/* canvas area - flex-1 */}
             <main className="flex-1 flex items-center justify-center bg-background relative">
                 {children}
+
+                {viewportLeftOverlay ? (
+                    <div className="absolute bottom-4 left-4 z-10">{viewportLeftOverlay}</div>
+                ) : null}
 
                 {/* Coming Soon Button */}
                 <Dialog>

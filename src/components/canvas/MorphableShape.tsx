@@ -8,15 +8,20 @@ import type { ShapeState } from "@/types/shape";
 import { useEffect, useMemo } from "react";
 
 const NUM_POINTS = 512;
+const SHAPE_ROTATION: [number, number, number] = [0.62, -0.52, 0.14];
 
 export default function MorphableShape({
     state,
-    width,
-    height,
+    shapeX,
+    shapeY,
+    canvasWidth,
+    canvasHeight,
 }: {
     state: ShapeState;
-    width: number;
-    height: number;
+    shapeX: number;
+    shapeY: number;
+    canvasWidth: number;
+    canvasHeight: number;
 }) {
     const time = useWobbleAnimation(state.wobbleSpeed);
 
@@ -41,7 +46,7 @@ export default function MorphableShape({
     }, [state.preset, state.roundness, radius]);
 
     const wobbledPoints = useMemo(() => {
-        const wobbleAmount = state.wobble * 0.3; // scale wobble to reasonable range
+        const wobbleAmount = state.wobble * 0.3;
         const randomness = state.wobbleRandomness / 100;
         return applyWobble(morphedPoints, time, wobbleAmount, randomness);
     }, [morphedPoints, time, state.wobble, state.wobbleRandomness]);
@@ -68,23 +73,19 @@ export default function MorphableShape({
         return () => geometry.dispose();
     }, [geometry]);
 
-    const world = screenToWorld(state.x, state.y, width, height);
+    const world = screenToWorld(shapeX, shapeY, canvasWidth, canvasHeight);
 
     return (
-        <mesh
-            geometry={geometry}
-            position={[world.x, world.y, 0]}
-            rotation={[0.62, -0.52, 0.14]}
-            castShadow
-            receiveShadow
-        >
-            <meshPhysicalMaterial
-                color={state.color}
-                roughness={0.9}
-                metalness={0.03}
-                clearcoat={0.14}
-                clearcoatRoughness={0.68}
-            />
-        </mesh>
+        <group position={[world.x, world.y, 0]} rotation={SHAPE_ROTATION}>
+            <mesh geometry={geometry} castShadow receiveShadow>
+                <meshPhysicalMaterial
+                    color={state.color}
+                    roughness={0.9}
+                    metalness={0.03}
+                    clearcoat={0.14}
+                    clearcoatRoughness={0.68}
+                />
+            </mesh>
+        </group>
     );
 }

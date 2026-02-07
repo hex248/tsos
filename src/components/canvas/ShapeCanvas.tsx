@@ -1,9 +1,11 @@
 import { screenToWorld } from "@/lib/canvas/coordinates";
 import type { ShapeState } from "@/types/shape";
+import type { ViewMode } from "@/types/viewMode";
 import { Canvas, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
 import { OrthographicCamera, Vector3 } from "three";
 import MorphableShape from "./MorphableShape";
+import ShapeDomControlPoints from "./ShapeDomControlPoints";
 import ShapeOrbitControls from "./ShapeOrbitControls";
 import ShapeSceneLighting from "./ShapeSceneLighting";
 
@@ -34,8 +36,12 @@ function CameraSync({ width, height }: { width: number; height: number }) {
 
 export default function ShapeCanvas({
     state,
+    onStateChange,
+    mode,
 }: {
     state: ShapeState;
+    onStateChange: (state: ShapeState) => void;
+    mode: ViewMode;
 }) {
     const [dimensions, setDimensions] = useState(getDimensions);
 
@@ -48,10 +54,22 @@ export default function ShapeCanvas({
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
+    const defaultCenter = useMemo(
+        () => ({ x: dimensions.width / 2, y: dimensions.height / 2 }),
+        [dimensions.width, dimensions.height],
+    );
+
+    const effectiveShapePosition = mode === "edit" ? defaultCenter : { x: state.x, y: state.y };
+
     const orbitTarget = useMemo(() => {
-        const world = screenToWorld(state.x, state.y, dimensions.width, dimensions.height);
+        const world = screenToWorld(
+            effectiveShapePosition.x,
+            effectiveShapePosition.y,
+            dimensions.width,
+            dimensions.height,
+        );
         return new Vector3(world.x, world.y, 0);
-    }, [state.x, state.y, dimensions.width, dimensions.height]);
+    }, [effectiveShapePosition.x, effectiveShapePosition.y, dimensions.width, dimensions.height]);
 
     return (
         <div
@@ -67,9 +85,22 @@ export default function ShapeCanvas({
             >
                 <CameraSync width={dimensions.width} height={dimensions.height} />
                 <ShapeSceneLighting />
-                <ShapeOrbitControls target={orbitTarget} />
-                <MorphableShape state={state} width={dimensions.width} height={dimensions.height} />
+                <ShapeOrbitControls mode={mode} target={orbitTarget} />
+                <MorphableShape
+                    state={state}
+                    shapeX={effectiveShapePosition.x}
+                    shapeY={effectiveShapePosition.y}
+                    canvasWidth={dimensions.width}
+                    canvasHeight={dimensions.height}
+                />
             </Canvas>
+            <ShapeDomControlPoints
+                mode={mode}
+                state={state}
+                onStateChange={onStateChange}
+                shapeX={effectiveShapePosition.x}
+                shapeY={effectiveShapePosition.y}
+            />
         </div>
     );
 }

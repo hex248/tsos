@@ -2,13 +2,15 @@ import ShapeCanvas from "@/components/canvas/ShapeCanvas";
 import ColorKeyboard from "@/components/controls/ColorKeyboard";
 import OctaveSelector from "@/components/controls/OctaveSelector";
 import PresetSelector from "@/components/controls/PresetSelector";
+import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { colorScale } from "@/constants/colorScale";
 import { useShapeState } from "@/hooks/useShapeState";
 import { type PreviewVoice, playPreviewSample, startPreviewVoice, stopPreviewVoice } from "@/lib/audio/synth";
+import type { ViewMode } from "@/types/viewMode";
 import { Info } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Layout from "./Layout";
 import { cn } from "./lib/utils";
 
@@ -68,6 +70,33 @@ function clampOctave(value: number) {
     return Math.min(MAX_OCTAVE, Math.max(MIN_OCTAVE, value));
 }
 
+function canToggleModeWithTab(target: EventTarget | null) {
+    if (!(target instanceof HTMLElement)) {
+        return true;
+    }
+
+    if (target.closest('[role="dialog"], [data-slot="dialog-content"]')) {
+        return false;
+    }
+
+    const tagName = target.tagName.toLowerCase();
+    if (
+        target.isContentEditable ||
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select" ||
+        tagName === "button"
+    ) {
+        return false;
+    }
+
+    if (target.closest("a, button, [role='button'], [role='slider'], [role='tab']")) {
+        return false;
+    }
+
+    return true;
+}
+
 function Index() {
     const [dimensions, setDimensions] = useState({
         width: window.innerWidth - 320,
@@ -90,8 +119,13 @@ function Index() {
     const centerY = dimensions.height / 2;
 
     const [state, setState] = useShapeState(centerX, centerY);
+    const [viewMode, setViewMode] = useState<ViewMode>("view");
     const activeVoicesRef = useRef<Map<string, { voice: PreviewVoice | null; keys: Set<string> }>>(new Map());
     const keyToNoteRef = useRef<Map<string, string>>(new Map());
+
+    const toggleMode = useCallback(() => {
+        setViewMode((prev) => (prev === "view" ? "edit" : "view"));
+    }, []);
 
     useEffect(() => {
         const stopAllVoices = () => {
@@ -107,6 +141,14 @@ function Index() {
 
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) {
+                return;
+            }
+
+            if (event.key === "Tab") {
+                if (canToggleModeWithTab(event.target)) {
+                    event.preventDefault();
+                    toggleMode();
+                }
                 return;
             }
 
@@ -201,7 +243,20 @@ function Index() {
             window.removeEventListener("blur", stopAllVoices);
             stopAllVoices();
         };
-    }, [setState]);
+    }, [setState, toggleMode]);
+
+    const modeToggleButton = (
+        <Button
+            variant={viewMode === "edit" ? "default" : "outline"}
+            size="sm"
+            className="rounded-full px-4"
+            onClick={toggleMode}
+            aria-pressed={viewMode === "edit"}
+            aria-label={`Switch to ${viewMode === "view" ? "edit" : "view"} mode`}
+        >
+            Mode: {viewMode === "view" ? "View" : "Edit"}
+        </Button>
+    );
 
     const sidebarContent = (
         <div className="flex flex-col gap-4">
@@ -405,8 +460,12 @@ function Index() {
     );
 
     return (
-        <Layout sidebarContent={sidebarContent} waveformColor={state.color}>
-            <ShapeCanvas state={state} />
+        <Layout
+            sidebarContent={sidebarContent}
+            waveformColor={state.color}
+            viewportLeftOverlay={modeToggleButton}
+        >
+            <ShapeCanvas state={state} onStateChange={setState} mode={viewMode} />
         </Layout>
     );
 }
