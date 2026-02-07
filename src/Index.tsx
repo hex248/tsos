@@ -118,7 +118,7 @@ function Index() {
     const centerY = dimensions.height / 2;
 
     const [state, setState] = useShapeState(centerX, centerY);
-    const [viewMode, setViewMode] = useState<ViewMode>("view");
+    const [viewMode, setViewMode] = useState<ViewMode>("edit");
     const activeVoicesRef = useRef<Map<string, { voice: PreviewVoice | null; keys: Set<string> }>>(new Map());
     const keyToNoteRef = useRef<Map<string, string>>(new Map());
 
