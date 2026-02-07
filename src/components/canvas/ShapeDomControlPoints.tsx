@@ -168,7 +168,7 @@ export default function ShapeDomControlPoints({
                 >
                     <button
                         type="button"
-                        className="pointer-events-auto absolute left-1/2 top-1/2 z-20 inline-flex size-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full shadow-sm focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                        className="pointer-events-auto absolute left-1/2 top-1/2 z-20 inline-flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full shadow-sm focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
                         style={{
                             backgroundColor: control.color,
                             opacity: control.disabled ? 0.4 : 1,
@@ -249,7 +249,7 @@ export default function ShapeDomControlPoints({
                             setDragFeedback(null);
                         }}
                     >
-                        <span className="text-[10px] font-semibold leading-none text-black/75">
+                        <span className="text-xs font-semibold leading-none text-black/75">
                             {control.control === "size" ? "S" : "R"}
                         </span>
                     </button>
@@ -257,7 +257,7 @@ export default function ShapeDomControlPoints({
                     {hoveredControl === control.control ||
                     focusedControl === control.control ||
                     activeControl === control.control ? (
-                        <div className="pointer-events-none absolute z-30 -top-14 left-1/2 -translate-x-1/2 rounded-md border border-border/70 bg-background/95 px-2 py-1 text-[11px] leading-tight text-foreground shadow-sm whitespace-nowrap">
+                        <div className="pointer-events-none absolute z-30 -top-18 left-1/2 -translate-x-1/2 rounded-md border border-border/70 bg-background/95 px-2 py-1 text-[11px] leading-tight text-foreground shadow-sm whitespace-nowrap">
                             <div className="font-medium">{CONTROL_META[control.control].label}</div>
                             <>
                                 <div>
