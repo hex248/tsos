@@ -1,5 +1,14 @@
 import { noteToFrequency } from "@/constants/colorScale";
-import { mapGrainToNoise, mapPresetToOscType, mapRoundnessToFade, mapSizeToGain } from "@/lib/audio/mapping";
+import {
+    mapAttackToSeconds,
+    mapDecayToSeconds,
+    mapGrainToNoise,
+    mapHoldToSeconds,
+    mapPresetToOscType,
+    mapRoundnessToFade,
+    mapSizeToGain,
+    mapSustainToGain,
+} from "@/lib/audio/mapping";
 import type { Preset } from "@/types/shape";
 import * as Tone from "tone";
 
@@ -54,6 +63,10 @@ type PreviewOptions = {
     roundness: number;
     size: number;
     grain: number;
+    attack: number;
+    hold: number;
+    decay: number;
+    sustain: number;
     note: string;
     octave: number;
     synthNodes: SynthNodes | null;
@@ -65,12 +78,12 @@ export type PreviewVoice = {
     crossFade: Tone.CrossFade;
     noise: Tone.Noise;
     gain: Tone.Gain;
+    minReleaseAt: number;
 };
 
-const PREVIEW_ATTACK = 0.02;
-const PREVIEW_DURATION = 0.2;
 const PREVIEW_CLEANUP = 0.05;
 const PREVIEW_RELEASE = 0.08;
+const PREVIEW_SUSTAIN_DURATION = 0.12;
 
 type PreviewSharedState = {
     destination: ReturnType<typeof Tone.getDestination>;
@@ -160,11 +173,24 @@ export async function playPreviewSample(options: PreviewOptions) {
 
     const now = Tone.now();
     const peak = Tone.dbToGain(mapSizeToGain(options.size));
-    const stopAt = now + PREVIEW_DURATION + PREVIEW_CLEANUP;
+    const attackTime = mapAttackToSeconds(options.attack);
+    const holdTime = mapHoldToSeconds(options.hold);
+    const decayTime = mapDecayToSeconds(options.decay);
+    const sustainLevel = mapSustainToGain(options.sustain);
+
+    const attackEnd = now + attackTime;
+    const holdEnd = attackEnd + holdTime;
+    const decayEnd = holdEnd + decayTime;
+    const releaseStart = decayEnd + PREVIEW_SUSTAIN_DURATION;
+    const stopAt = releaseStart + PREVIEW_RELEASE + PREVIEW_CLEANUP;
+    const sustainGain = peak * sustainLevel;
 
     previewGain.gain.setValueAtTime(0, now);
-    previewGain.gain.linearRampToValueAtTime(peak, now + PREVIEW_ATTACK);
-    previewGain.gain.linearRampToValueAtTime(0, now + PREVIEW_DURATION);
+    previewGain.gain.linearRampToValueAtTime(peak, attackEnd);
+    previewGain.gain.linearRampToValueAtTime(peak, holdEnd);
+    previewGain.gain.linearRampToValueAtTime(sustainGain, decayEnd);
+    previewGain.gain.setValueAtTime(sustainGain, releaseStart);
+    previewGain.gain.linearRampToValueAtTime(0, releaseStart + PREVIEW_RELEASE);
 
     oscillatorA.start(now);
     oscillatorB.start(now);
@@ -212,9 +238,19 @@ export async function startPreviewVoice(options: PreviewOptions): Promise<Previe
 
     const now = Tone.now();
     const peak = Tone.dbToGain(mapSizeToGain(options.size));
+    const attackTime = mapAttackToSeconds(options.attack);
+    const holdTime = mapHoldToSeconds(options.hold);
+    const decayTime = mapDecayToSeconds(options.decay);
+    const sustainLevel = mapSustainToGain(options.sustain);
+
+    const attackEnd = now + attackTime;
+    const holdEnd = attackEnd + holdTime;
+    const decayEnd = holdEnd + decayTime;
 
     previewGain.gain.setValueAtTime(0, now);
-    previewGain.gain.linearRampToValueAtTime(peak, now + PREVIEW_ATTACK);
+    previewGain.gain.linearRampToValueAtTime(peak, attackEnd);
+    previewGain.gain.linearRampToValueAtTime(peak, holdEnd);
+    previewGain.gain.linearRampToValueAtTime(peak * sustainLevel, decayEnd);
 
     oscillatorA.start(now);
     oscillatorB.start(now);
@@ -226,16 +262,19 @@ export async function startPreviewVoice(options: PreviewOptions): Promise<Previe
         crossFade,
         noise,
         gain: previewGain,
+        minReleaseAt: decayEnd,
     };
 }
 
 export function stopPreviewVoice(voice: PreviewVoice, synthNodes: SynthNodes | null) {
     const now = Tone.now();
-    const stopAt = now + PREVIEW_RELEASE + PREVIEW_CLEANUP;
+    const releaseAt = Math.max(now, voice.minReleaseAt);
+    const stopAt = releaseAt + PREVIEW_RELEASE + PREVIEW_CLEANUP;
 
-    voice.gain.gain.cancelScheduledValues(now);
-    voice.gain.gain.setValueAtTime(voice.gain.gain.value, now);
-    voice.gain.gain.linearRampToValueAtTime(0, now + PREVIEW_RELEASE);
+    const releaseStartValue = voice.gain.gain.getValueAtTime(releaseAt);
+    voice.gain.gain.cancelScheduledValues(releaseAt);
+    voice.gain.gain.setValueAtTime(releaseStartValue, releaseAt);
+    voice.gain.gain.linearRampToValueAtTime(0, releaseAt + PREVIEW_RELEASE);
 
     voice.oscillatorA.stop(stopAt);
     voice.oscillatorB.stop(stopAt);

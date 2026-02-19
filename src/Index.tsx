@@ -1,5 +1,6 @@
 import ShapeCanvas from "@/components/canvas/ShapeCanvas";
 import ColorKeyboard from "@/components/controls/ColorKeyboard";
+import EnvelopeControls from "@/components/controls/EnvelopeControls";
 import OctaveSelector from "@/components/controls/OctaveSelector";
 import PresetSelector from "@/components/controls/PresetSelector";
 import { Button } from "@/components/ui/button";
@@ -186,6 +187,10 @@ function Index() {
                         roundness: prev.roundness,
                         size: prev.size,
                         grain: prev.grain,
+                        attack: prev.attack,
+                        hold: prev.hold,
+                        decay: prev.decay,
+                        sustain: prev.sustain,
                         note: binding.note,
                         octave: targetOctave,
                         synthNodes: null,
@@ -292,6 +297,10 @@ function Index() {
                             roundness: state.roundness,
                             size: state.size,
                             grain: state.grain,
+                            attack: state.attack,
+                            hold: state.hold,
+                            decay: state.decay,
+                            sustain: state.sustain,
                             note,
                             octave: state.octave,
                             synthNodes: null,
@@ -360,6 +369,31 @@ function Index() {
                     min={0}
                     max={100}
                     onValueChange={([v]) => setState({ ...state, roundness: v })}
+                />
+            </div>
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">Sound Shape</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                Controls AHDS envelope stages: attack time, hold duration, decay time, and
+                                sustain level.
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
+                <EnvelopeControls
+                    values={{
+                        attack: state.attack,
+                        hold: state.hold,
+                        decay: state.decay,
+                        sustain: state.sustain,
+                    }}
+                    onChange={(envelope) => setState({ ...state, ...envelope })}
                 />
             </div>
             {/* wobble controls temporarily hidden

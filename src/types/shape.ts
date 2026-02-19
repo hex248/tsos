@@ -10,6 +10,10 @@ export interface ShapeState {
     wobbleSpeed: number; // 0-100, wobble animation speed
     wobbleRandomness: number; // 0-100, noise vs sine blend
     grain: number; // 0-100, noise mix
+    attack: number; // 0-100, envelope attack time
+    hold: number; // 0-100, envelope hold time
+    decay: number; // 0-100, envelope decay time
+    sustain: number; // 0-100, envelope sustain level
     color: string; // hex color from clavier keyboard
     octave: number; // 1-8, frequency multiplier
 }

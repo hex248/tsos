@@ -11,6 +11,10 @@ const DEFAULT_STATE: ShapeState = {
     wobbleSpeed: 50, // medium
     wobbleRandomness: 50, // medium
     grain: 0, // none
+    attack: 20,
+    hold: 20,
+    decay: 30,
+    sustain: 60,
     color: "#FF0000", // red (C)
     octave: 4, // middle octave
 };
