@@ -362,6 +362,7 @@ function Index() {
                     onValueChange={([v]) => setState({ ...state, roundness: v })}
                 />
             </div>
+            {/* wobble controls temporarily hidden
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">Wobble</span>
@@ -431,6 +432,7 @@ function Index() {
                     onValueChange={([v]) => setState({ ...state, wobbleRandomness: v })}
                 />
             </div>
+            */}
         </div>
     );
 
