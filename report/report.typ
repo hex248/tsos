@@ -45,18 +45,7 @@
 
 #pagebreak()
 
-= Declaration
-
-This report has been prepared based on my own work. Where other published and unpublished source materials have been used, these have been acknowledged in references.
-
-Word Count: TODO
-\
-Student Name: Oliver Bryan
-\
-Date of Submission: 24/04/26
-
-#pagebreak()
-
+#import "chapters/declaration.typ": declaration
 #import "chapters/abstract.typ": abstract
 #import "chapters/acknowledgements.typ": acknowledgements
 #import "chapters/list_of_figures.typ": list_of_figures
@@ -70,6 +59,7 @@ Date of Submission: 24/04/26
 #import "chapters/testing.typ": testing
 #import "chapters/conclusions_and_reflections.typ": conclusions_and_reflections
 
+#declaration
 #abstract
 #acknowledgements
 

@@ -1,7 +1,10 @@
 #let list_of_figures = [
 = List of figures
 
-List of figures, linking figure numbers to page numbers. Hyperlink the page numbers/figures.
+- list of figures
+- linking figure numbers to page numbers
+- hyperlink the page numbers/figures
+- if no figures, delete this page
 
 #pagebreak()
 ]
