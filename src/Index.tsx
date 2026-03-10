@@ -97,6 +97,43 @@ function canToggleModeWithTab(target: EventTarget | null) {
     return true;
 }
 
+function parseHexColor(color: string) {
+    const normalized = color.replace("#", "");
+
+    return {
+        red: Number.parseInt(normalized.slice(0, 2), 16),
+        green: Number.parseInt(normalized.slice(2, 4), 16),
+        blue: Number.parseInt(normalized.slice(4, 6), 16),
+    };
+}
+
+function mixColors(colors: string[]) {
+    if (colors.length === 0) {
+        throw new Error("cannot mix an empty color list");
+    }
+
+    const totals = colors.reduce(
+        (accumulator, color) => {
+            const rgb = parseHexColor(color);
+
+            return {
+                red: accumulator.red + rgb.red,
+                green: accumulator.green + rgb.green,
+                blue: accumulator.blue + rgb.blue,
+            };
+        },
+        { red: 0, green: 0, blue: 0 },
+    );
+
+    return `#${Math.round(totals.red / colors.length)
+        .toString(16)
+        .padStart(2, "0")}${Math.round(totals.green / colors.length)
+        .toString(16)
+        .padStart(2, "0")}${Math.round(totals.blue / colors.length)
+        .toString(16)
+        .padStart(2, "0")}`;
+}
+
 function Index() {
     const [dimensions, setDimensions] = useState({
         width: window.innerWidth - 320,
@@ -131,10 +168,10 @@ function Index() {
     }, []);
 
     const syncActiveKeyboardColors = useCallback(() => {
-        setActiveKeyboardColors(
-            Array.from(new Set(Array.from(activeVoicesRef.current.values(), (entry) => entry.color))),
-        );
+        setActiveKeyboardColors(Array.from(activeVoicesRef.current.values(), (entry) => entry.color));
     }, []);
+
+    const displayedColor = activeKeyboardColors.length > 0 ? mixColors(activeKeyboardColors) : state.color;
 
     useEffect(() => {
         const stopAllVoices = () => {
@@ -225,10 +262,7 @@ function Index() {
 
                 syncActiveKeyboardColors();
 
-                return {
-                    ...prev,
-                    color,
-                };
+                return prev;
             });
         };
 
@@ -315,7 +349,7 @@ function Index() {
                     </Tooltip>
                 </div>
                 <ColorKeyboard
-                    value={state.color}
+                    value={displayedColor}
                     activeColors={activeKeyboardColors}
                     onChange={(color) => {
                         const note =
@@ -497,10 +531,14 @@ function Index() {
     return (
         <Layout
             sidebarContent={sidebarContent}
-            waveformColor={state.color}
+            waveformColor={displayedColor}
             viewportLeftOverlay={modeToggleButton}
         >
-            <ShapeCanvas state={state} onStateChange={setState} mode={viewMode} />
+            <ShapeCanvas
+                state={{ ...state, color: displayedColor }}
+                onStateChange={setState}
+                mode={viewMode}
+            />
         </Layout>
     );
 }
