@@ -302,6 +302,17 @@ function Index() {
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">Note/Colour</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                Inspired by the clavier a lumieres, a light keyboard that linked notes to
+                                colour.
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
                 </div>
                 <ColorKeyboard
                     value={state.color}
@@ -337,10 +348,7 @@ function Index() {
                             <Info className="size-3.5 text-muted-foreground cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>
-                                Transposes frequency by octaves: f = f₀ × 2ⁿ. Doubles frequency per octave,
-                                shifting the entire harmonic series.
-                            </p>
+                            <p>Raises or lowers the pitch by octaves.</p>
                         </TooltipContent>
                     </Tooltip>
                 </div>
@@ -354,10 +362,7 @@ function Index() {
                             <Info className="size-3.5 text-muted-foreground cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>
-                                Controls gain/amplitude in dB. Affects signal level, RMS power, and loudness
-                                perception.
-                            </p>
+                            <p>Controls how loud the sound is (gain).</p>
                         </TooltipContent>
                     </Tooltip>
                 </div>
@@ -377,8 +382,8 @@ function Index() {
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>
-                                Adjusts duty cycle ratio or wave crest factor, altering the balance between
-                                fundamental and harmonics.
+                                Blends the sound from sharp to smooth (100% roundness is a sine wave, 0%
+                                roundness is the shape/wave you selected).
                             </p>
                         </TooltipContent>
                     </Tooltip>
