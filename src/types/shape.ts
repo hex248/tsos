@@ -6,9 +6,9 @@ export interface ShapeState {
     preset: Preset;
     roundness: number; // 0-100, controls morph from sharp to round
     size: number; // 0-100, controls volume
-    wobble: number; // 0-100, visual wobble amount
-    wobbleSpeed: number; // 0-100, wobble animation speed
-    wobbleRandomness: number; // 0-100, noise vs sine blend
+    wobble: number; // 0-100, shared visual wobble and audio tremolo depth
+    wobbleSpeed: number; // 0-100, shared wobble animation and tremolo speed
+    wobbleRandomness: number; // 0-100, shared visual and audio noise vs sine blend
     grain: number; // 0-100, noise mix
     attack: number; // 0-100, envelope attack time
     hold: number; // 0-100, envelope hold time

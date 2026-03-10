@@ -8,7 +8,10 @@ import {
     mapRoundnessToFade,
     mapSizeToGain,
     mapSustainToGain,
+    mapWobbleSpeedToHz,
+    mapWobbleToTremoloDepth,
 } from "@/lib/audio/mapping";
+import { noise2D } from "@/lib/noise";
 import type { Preset } from "@/types/shape";
 import * as Tone from "tone";
 
@@ -67,6 +70,9 @@ type PreviewOptions = {
     hold: number;
     decay: number;
     sustain: number;
+    wobble: number;
+    wobbleSpeed: number;
+    wobbleRandomness: number;
     note: string;
     octave: number;
     synthNodes: SynthNodes | null;
@@ -78,6 +84,8 @@ export type PreviewVoice = {
     crossFade: Tone.CrossFade;
     noise: Tone.Noise;
     gain: Tone.Gain;
+    tremoloGain: Tone.Gain;
+    stopWobble: () => void;
     minReleaseAt: number;
 };
 
@@ -148,10 +156,58 @@ function releasePreviewShared(synthNodes: SynthNodes | null) {
     }
 }
 
+function startWobbleTremolo(
+    tremoloGain: Tone.Gain,
+    wobble: number,
+    wobbleSpeed: number,
+    wobbleRandomness: number,
+) {
+    if (wobble === 0 || wobbleSpeed === 0) {
+        tremoloGain.gain.value = 1;
+        return () => {
+            tremoloGain.gain.cancelScheduledValues(Tone.now());
+            tremoloGain.gain.value = 1;
+        };
+    }
+
+    const rateHz = mapWobbleSpeedToHz(wobbleSpeed);
+    const depth = mapWobbleToTremoloDepth(wobble);
+    const randomness = Math.min(1, Math.max(0, wobbleRandomness / 100));
+    let rafId = 0;
+
+    const updateGain = () => {
+        const t = performance.now() / 1000;
+        const sine = Math.sin(2 * Math.PI * rateHz * t);
+        const noise = noise2D(t * rateHz * 0.6, 17.13);
+        const shape = sine * (1 - randomness) + noise * randomness;
+        const unipolar = (shape + 1) / 2;
+        const multiplier = Math.min(1, Math.max(0, 1 - depth * (1 - unipolar)));
+        const now = Tone.now();
+        const currentValue = tremoloGain.gain.getValueAtTime(now);
+
+        tremoloGain.gain.cancelScheduledValues(now);
+        tremoloGain.gain.setValueAtTime(currentValue, now);
+        tremoloGain.gain.linearRampToValueAtTime(multiplier, now + 1 / 60);
+
+        rafId = window.requestAnimationFrame(updateGain);
+    };
+
+    tremoloGain.gain.value = 1;
+    rafId = window.requestAnimationFrame(updateGain);
+
+    return () => {
+        window.cancelAnimationFrame(rafId);
+        const now = Tone.now();
+        tremoloGain.gain.cancelScheduledValues(now);
+        tremoloGain.gain.setValueAtTime(1, now);
+    };
+}
+
 export async function playPreviewSample(options: PreviewOptions) {
     await acquirePreviewShared(options.synthNodes);
 
-    const previewGain = new Tone.Gain(0);
+    const envelopeGain = new Tone.Gain(0);
+    const tremoloGain = new Tone.Gain(1);
     const crossFade = new Tone.CrossFade(mapRoundnessToFade(options.roundness));
     const oscillatorA = new Tone.Oscillator({ type: mapPresetToOscType(options.preset) });
     const oscillatorB = new Tone.Oscillator({ type: "sine" });
@@ -159,9 +215,17 @@ export async function playPreviewSample(options: PreviewOptions) {
 
     oscillatorA.connect(crossFade.a);
     oscillatorB.connect(crossFade.b);
-    crossFade.connect(previewGain);
-    noise.connect(previewGain);
-    previewGain.toDestination();
+    crossFade.connect(envelopeGain);
+    noise.connect(envelopeGain);
+    envelopeGain.connect(tremoloGain);
+    tremoloGain.toDestination();
+
+    const stopWobble = startWobbleTremolo(
+        tremoloGain,
+        options.wobble,
+        options.wobbleSpeed,
+        options.wobbleRandomness,
+    );
 
     const frequency = noteToFrequency(options.note, options.octave);
     oscillatorA.frequency.value = frequency;
@@ -185,12 +249,12 @@ export async function playPreviewSample(options: PreviewOptions) {
     const stopAt = releaseStart + PREVIEW_RELEASE + PREVIEW_CLEANUP;
     const sustainGain = peak * sustainLevel;
 
-    previewGain.gain.setValueAtTime(0, now);
-    previewGain.gain.linearRampToValueAtTime(peak, attackEnd);
-    previewGain.gain.linearRampToValueAtTime(peak, holdEnd);
-    previewGain.gain.linearRampToValueAtTime(sustainGain, decayEnd);
-    previewGain.gain.setValueAtTime(sustainGain, releaseStart);
-    previewGain.gain.linearRampToValueAtTime(0, releaseStart + PREVIEW_RELEASE);
+    envelopeGain.gain.setValueAtTime(0, now);
+    envelopeGain.gain.linearRampToValueAtTime(peak, attackEnd);
+    envelopeGain.gain.linearRampToValueAtTime(peak, holdEnd);
+    envelopeGain.gain.linearRampToValueAtTime(sustainGain, decayEnd);
+    envelopeGain.gain.setValueAtTime(sustainGain, releaseStart);
+    envelopeGain.gain.linearRampToValueAtTime(0, releaseStart + PREVIEW_RELEASE);
 
     oscillatorA.start(now);
     oscillatorB.start(now);
@@ -201,11 +265,13 @@ export async function playPreviewSample(options: PreviewOptions) {
 
     window.setTimeout(
         () => {
+            stopWobble();
             oscillatorA.dispose();
             oscillatorB.dispose();
             crossFade.dispose();
             noise.dispose();
-            previewGain.dispose();
+            envelopeGain.dispose();
+            tremoloGain.dispose();
 
             releasePreviewShared(options.synthNodes);
         },
@@ -216,7 +282,8 @@ export async function playPreviewSample(options: PreviewOptions) {
 export async function startPreviewVoice(options: PreviewOptions): Promise<PreviewVoice> {
     await acquirePreviewShared(options.synthNodes);
 
-    const previewGain = new Tone.Gain(0);
+    const envelopeGain = new Tone.Gain(0);
+    const tremoloGain = new Tone.Gain(1);
     const crossFade = new Tone.CrossFade(mapRoundnessToFade(options.roundness));
     const oscillatorA = new Tone.Oscillator({ type: mapPresetToOscType(options.preset) });
     const oscillatorB = new Tone.Oscillator({ type: "sine" });
@@ -224,9 +291,17 @@ export async function startPreviewVoice(options: PreviewOptions): Promise<Previe
 
     oscillatorA.connect(crossFade.a);
     oscillatorB.connect(crossFade.b);
-    crossFade.connect(previewGain);
-    noise.connect(previewGain);
-    previewGain.toDestination();
+    crossFade.connect(envelopeGain);
+    noise.connect(envelopeGain);
+    envelopeGain.connect(tremoloGain);
+    tremoloGain.toDestination();
+
+    const stopWobble = startWobbleTremolo(
+        tremoloGain,
+        options.wobble,
+        options.wobbleSpeed,
+        options.wobbleRandomness,
+    );
 
     const frequency = noteToFrequency(options.note, options.octave);
     oscillatorA.frequency.value = frequency;
@@ -247,10 +322,10 @@ export async function startPreviewVoice(options: PreviewOptions): Promise<Previe
     const holdEnd = attackEnd + holdTime;
     const decayEnd = holdEnd + decayTime;
 
-    previewGain.gain.setValueAtTime(0, now);
-    previewGain.gain.linearRampToValueAtTime(peak, attackEnd);
-    previewGain.gain.linearRampToValueAtTime(peak, holdEnd);
-    previewGain.gain.linearRampToValueAtTime(peak * sustainLevel, decayEnd);
+    envelopeGain.gain.setValueAtTime(0, now);
+    envelopeGain.gain.linearRampToValueAtTime(peak, attackEnd);
+    envelopeGain.gain.linearRampToValueAtTime(peak, holdEnd);
+    envelopeGain.gain.linearRampToValueAtTime(peak * sustainLevel, decayEnd);
 
     oscillatorA.start(now);
     oscillatorB.start(now);
@@ -261,7 +336,9 @@ export async function startPreviewVoice(options: PreviewOptions): Promise<Previe
         oscillatorB,
         crossFade,
         noise,
-        gain: previewGain,
+        gain: envelopeGain,
+        tremoloGain,
+        stopWobble,
         minReleaseAt: decayEnd,
     };
 }
@@ -282,11 +359,13 @@ export function stopPreviewVoice(voice: PreviewVoice, synthNodes: SynthNodes | n
 
     window.setTimeout(
         () => {
+            voice.stopWobble();
             voice.oscillatorA.dispose();
             voice.oscillatorB.dispose();
             voice.crossFade.dispose();
             voice.noise.dispose();
             voice.gain.dispose();
+            voice.tremoloGain.dispose();
             releasePreviewShared(synthNodes);
         },
         (stopAt - now) * 1000,

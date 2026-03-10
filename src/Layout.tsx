@@ -76,14 +76,6 @@ export default function Layout({
                         </DialogHeader>
                         <div className="space-y-4 py-2">
                             <div className="space-y-2">
-                                <h4 className="font-medium">Wobble Controls</h4>
-                                <p className="text-sm text-muted-foreground">
-                                    Wobble will modulate the pitch of the sound, adding vibrato and subtle
-                                    frequency variations for a more organic, "human" feel. The more "random"
-                                    the wobble, the more imperfect and natural-sounding it will be.
-                                </p>
-                            </div>
-                            <div className="space-y-2">
                                 <h4 className="font-medium">Key Selection</h4>
                                 <p className="text-sm text-muted-foreground">
                                     Allow users to select a musical key (e.g. C Major, A Minor) so the
