@@ -4,6 +4,7 @@ import EnvelopeControls from "@/components/controls/EnvelopeControls";
 import ExportDialog from "@/components/controls/ExportDialog";
 import OctaveSelector from "@/components/controls/OctaveSelector";
 import PresetSelector from "@/components/controls/PresetSelector";
+import TutorialDialog from "@/components/controls/TutorialDialog";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -66,6 +67,7 @@ const KEY_NOTE_MAP = new Map(KEY_NOTE_BINDINGS.map((binding) => [binding.key, bi
 const COLOR_BY_NOTE = new Map(colorScale.map((entry) => [entry.note, entry.color]));
 const MIN_OCTAVE = 1;
 const MAX_OCTAVE = 8;
+const TUTORIAL_STORAGE_KEY = "tsos-tutorial-seen";
 
 function clampOctave(value: number) {
     return Math.min(MAX_OCTAVE, Math.max(MIN_OCTAVE, value));
@@ -158,14 +160,35 @@ function Index() {
 
     const [state, setState] = useShapeState(centerX, centerY);
     const [viewMode, setViewMode] = useState<ViewMode>("edit");
+    const [isTutorialOpen, setIsTutorialOpen] = useState(false);
     const [activeKeyboardColors, setActiveKeyboardColors] = useState<string[]>([]);
     const activeVoicesRef = useRef<
         Map<string, { voice: PreviewVoice | null; keys: Set<string>; color: string }>
     >(new Map());
     const keyToNoteRef = useRef<Map<string, string>>(new Map());
 
+    useEffect(() => {
+        try {
+            if (!localStorage.getItem(TUTORIAL_STORAGE_KEY)) {
+                setIsTutorialOpen(true);
+            }
+        } catch {
+            setIsTutorialOpen(true);
+        }
+    }, []);
+
     const toggleMode = useCallback(() => {
         setViewMode((prev) => (prev === "view" ? "edit" : "view"));
+    }, []);
+
+    const handleTutorialOpenChange = useCallback((open: boolean) => {
+        setIsTutorialOpen(open);
+
+        if (!open) {
+            try {
+                localStorage.setItem(TUTORIAL_STORAGE_KEY, "true");
+            } catch {}
+        }
     }, []);
 
     const syncActiveKeyboardColors = useCallback(() => {
@@ -527,6 +550,9 @@ function Index() {
         <Layout
             sidebarContent={sidebarContent}
             waveformColor={displayedColor}
+            viewportTopLeftOverlay={
+                <TutorialDialog open={isTutorialOpen} onOpenChange={handleTutorialOpenChange} />
+            }
             viewportLeftOverlay={modeToggleButton}
             viewportRightOverlay={<ExportDialog state={state} />}
         >

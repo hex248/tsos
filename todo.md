@@ -7,5 +7,4 @@
 
 KEY DELIVERABLES:
 - key selection
-- startup instructions
-  - can be opened in the bottom right (like "coming soon" menu)
+- save sound configurations (localStorage)

@@ -9,12 +9,14 @@ export default function Layout({
     children,
     sidebarContent,
     waveformColor,
+    viewportTopLeftOverlay,
     viewportLeftOverlay,
     viewportRightOverlay,
 }: {
     children: React.ReactNode;
     sidebarContent?: React.ReactNode;
     waveformColor?: string;
+    viewportTopLeftOverlay?: React.ReactNode;
     viewportLeftOverlay?: React.ReactNode;
     viewportRightOverlay?: React.ReactNode;
 }) {
@@ -56,6 +58,9 @@ export default function Layout({
             <main className="flex-1 flex items-center justify-center bg-background relative">
                 {children}
 
+                {viewportTopLeftOverlay ? (
+                    <div className="absolute top-4 left-4 z-10">{viewportTopLeftOverlay}</div>
+                ) : null}
                 {viewportLeftOverlay ? (
                     <div className="absolute bottom-4 left-4 z-10">{viewportLeftOverlay}</div>
                 ) : null}
