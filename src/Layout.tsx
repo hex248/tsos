@@ -10,11 +10,13 @@ export default function Layout({
     sidebarContent,
     waveformColor,
     viewportLeftOverlay,
+    viewportRightOverlay,
 }: {
     children: React.ReactNode;
     sidebarContent?: React.ReactNode;
     waveformColor?: string;
     viewportLeftOverlay?: React.ReactNode;
+    viewportRightOverlay?: React.ReactNode;
 }) {
     const location = useLocation();
 
@@ -57,14 +59,12 @@ export default function Layout({
                 {viewportLeftOverlay ? (
                     <div className="absolute bottom-4 left-4 z-10">{viewportLeftOverlay}</div>
                 ) : null}
-
-                {/* Coming Soon Button */}
                 <Dialog>
                     <DialogTrigger asChild>
                         <Button
                             variant="outline"
                             size="sm"
-                            className="absolute bottom-4 right-4 rounded-full px-4"
+                            className="absolute top-4 right-4 rounded-full px-4"
                         >
                             <Clock className="size-4 mr-1" />
                             Coming Soon
@@ -90,16 +90,12 @@ export default function Layout({
                                     keyboard will follow a key, making it easier to create succinct melodies.
                                 </p>
                             </div>
-                            <div className="space-y-2">
-                                <h4 className="font-medium">Export Sound</h4>
-                                <p className="text-sm text-muted-foreground">
-                                    Users will be able to export their generated sounds as .wav or .mp3. This
-                                    can then be sampled into other audio software or used in projects.
-                                </p>
-                            </div>
                         </div>
                     </DialogContent>
                 </Dialog>
+                {viewportRightOverlay ? (
+                    <div className="absolute bottom-4 right-4 z-10">{viewportRightOverlay}</div>
+                ) : null}
             </main>
         </div>
     );

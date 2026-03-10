@@ -1,6 +1,7 @@
 import ShapeCanvas from "@/components/canvas/ShapeCanvas";
 import ColorKeyboard from "@/components/controls/ColorKeyboard";
 import EnvelopeControls from "@/components/controls/EnvelopeControls";
+import ExportDialog from "@/components/controls/ExportDialog";
 import OctaveSelector from "@/components/controls/OctaveSelector";
 import PresetSelector from "@/components/controls/PresetSelector";
 import { Button } from "@/components/ui/button";
@@ -533,6 +534,7 @@ function Index() {
             sidebarContent={sidebarContent}
             waveformColor={displayedColor}
             viewportLeftOverlay={modeToggleButton}
+            viewportRightOverlay={<ExportDialog state={state} />}
         >
             <ShapeCanvas
                 state={{ ...state, color: displayedColor }}
