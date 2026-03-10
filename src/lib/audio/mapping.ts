@@ -24,9 +24,12 @@ export function mapGrainToNoise(grain: number): number {
     return clamp01(grain / 100);
 }
 
-export function mapWobbleToDetune(wobble: number): number {
-    const maxCents = 50;
-    return clamp01(wobble / 100) * maxCents;
+export function mapWobbleToTremoloDepth(wobble: number): number {
+    return clamp01(wobble / 100) * 0.85;
+}
+
+export function mapWobbleSpeedToHz(speed: number): number {
+    return clamp01(speed / 100) * 10;
 }
 
 export function mapAttackToSeconds(attack: number): number {

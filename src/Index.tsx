@@ -243,6 +243,9 @@ function Index() {
                         hold: prev.hold,
                         decay: prev.decay,
                         sustain: prev.sustain,
+                        wobble: prev.wobble,
+                        wobbleSpeed: prev.wobbleSpeed,
+                        wobbleRandomness: prev.wobbleRandomness,
                         note: binding.note,
                         octave: targetOctave,
                         synthNodes: null,
@@ -366,6 +369,9 @@ function Index() {
                             hold: state.hold,
                             decay: state.decay,
                             sustain: state.sustain,
+                            wobble: state.wobble,
+                            wobbleSpeed: state.wobbleSpeed,
+                            wobbleRandomness: state.wobbleRandomness,
                             note,
                             octave: state.octave,
                             synthNodes: null,
@@ -455,7 +461,6 @@ function Index() {
                     onChange={(envelope) => setState({ ...state, ...envelope })}
                 />
             </div>
-            {/* wobble controls temporarily hidden
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">Wobble</span>
@@ -464,13 +469,9 @@ function Index() {
                             <Info className="size-3.5 text-muted-foreground cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>
-                                LFO modulation depth in cents (±100 = ±1 semitone). Controls pitch deviation
-                                magnitude from FM synthesis.
-                            </p>
+                            <p>Controls tremolo depth by modulating volume over time.</p>
                         </TooltipContent>
                     </Tooltip>
-                    <span className="text-xs text-muted-foreground">(currently only visual)</span>
                 </div>
                 <Slider
                     value={[state.wobble]}
@@ -487,13 +488,9 @@ function Index() {
                             <Info className="size-3.5 text-muted-foreground cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>
-                                LFO frequency in Hz. Determines how many pitch modulation cycles occur per
-                                second.
-                            </p>
+                            <p>Controls tremolo rate in Hz.</p>
                         </TooltipContent>
                     </Tooltip>
-                    <span className="text-xs text-muted-foreground">(currently only visual)</span>
                 </div>
                 <Slider
                     value={[state.wobbleSpeed]}
@@ -511,12 +508,10 @@ function Index() {
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>
-                                Adds noise-based jitter to the LFO signal. Breaks periodicity for organic,
-                                non-mechanical modulation.
+                                Blends the tremolo from smooth periodic motion toward more irregular movement.
                             </p>
                         </TooltipContent>
                     </Tooltip>
-                    <span className="text-xs text-muted-foreground">(currently only visual)</span>
                 </div>
                 <Slider
                     value={[state.wobbleRandomness]}
@@ -525,7 +520,6 @@ function Index() {
                     onValueChange={([v]) => setState({ ...state, wobbleRandomness: v })}
                 />
             </div>
-            */}
         </div>
     );
 
