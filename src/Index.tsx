@@ -120,11 +120,20 @@ function Index() {
 
     const [state, setState] = useShapeState(centerX, centerY);
     const [viewMode, setViewMode] = useState<ViewMode>("edit");
-    const activeVoicesRef = useRef<Map<string, { voice: PreviewVoice | null; keys: Set<string> }>>(new Map());
+    const [activeKeyboardColors, setActiveKeyboardColors] = useState<string[]>([]);
+    const activeVoicesRef = useRef<
+        Map<string, { voice: PreviewVoice | null; keys: Set<string>; color: string }>
+    >(new Map());
     const keyToNoteRef = useRef<Map<string, string>>(new Map());
 
     const toggleMode = useCallback(() => {
         setViewMode((prev) => (prev === "view" ? "edit" : "view"));
+    }, []);
+
+    const syncActiveKeyboardColors = useCallback(() => {
+        setActiveKeyboardColors(
+            Array.from(new Set(Array.from(activeVoicesRef.current.values(), (entry) => entry.color))),
+        );
     }, []);
 
     useEffect(() => {
@@ -132,6 +141,7 @@ function Index() {
             const entries = Array.from(activeVoicesRef.current.values());
             activeVoicesRef.current.clear();
             keyToNoteRef.current.clear();
+            setActiveKeyboardColors([]);
             for (const entry of entries) {
                 if (entry.voice) {
                     stopPreviewVoice(entry.voice, null);
@@ -181,7 +191,11 @@ function Index() {
                 if (existingEntry) {
                     existingEntry.keys.add(normalizedKey);
                 } else {
-                    activeVoicesRef.current.set(noteKey, { voice: null, keys: new Set([normalizedKey]) });
+                    activeVoicesRef.current.set(noteKey, {
+                        voice: null,
+                        keys: new Set([normalizedKey]),
+                        color,
+                    });
                     void startPreviewVoice({
                         preset: prev.preset,
                         roundness: prev.roundness,
@@ -208,6 +222,8 @@ function Index() {
                         }
                     });
                 }
+
+                syncActiveKeyboardColors();
 
                 return {
                     ...prev,
@@ -236,6 +252,8 @@ function Index() {
                     stopPreviewVoice(entry.voice, null);
                 }
             }
+
+            syncActiveKeyboardColors();
         };
 
         window.addEventListener("keydown", handleKeyDown);
@@ -247,7 +265,7 @@ function Index() {
             window.removeEventListener("blur", stopAllVoices);
             stopAllVoices();
         };
-    }, [setState, toggleMode]);
+    }, [setState, syncActiveKeyboardColors, toggleMode]);
 
     const modeToggleButton = (
         <Button
@@ -287,6 +305,7 @@ function Index() {
                 </div>
                 <ColorKeyboard
                     value={state.color}
+                    activeColors={activeKeyboardColors}
                     onChange={(color) => {
                         const note =
                             colorScale.find((entry) => entry.color.toLowerCase() === color.toLowerCase())

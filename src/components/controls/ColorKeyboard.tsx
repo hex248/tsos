@@ -13,18 +13,25 @@ const BLACK_KEYS = [
 
 export default function ColorKeyboard({
     value,
+    activeColors = [],
     onChange,
 }: {
     value: string;
+    activeColors?: string[];
     onChange: (color: string) => void;
 }) {
     const colorByNote = Object.fromEntries(colorScale.map((entry) => [entry.note, entry.color]));
+    const normalizedValue = value.toLowerCase();
+    const activeColorSet = new Set(activeColors.map((color) => color.toLowerCase()));
+    const showPressedColors = activeColorSet.size > 0;
 
     return (
         <div className="relative flex w-full select-none">
             {WHITE_KEYS.map((note) => {
                 const color = colorByNote[note];
-                const isActive = color.toLowerCase() === value.toLowerCase();
+                const isActive = showPressedColors
+                    ? activeColorSet.has(color.toLowerCase())
+                    : color.toLowerCase() === normalizedValue;
 
                 return (
                     <Toggle
@@ -66,7 +73,9 @@ export default function ColorKeyboard({
 
             {BLACK_KEYS.map((key) => {
                 const color = colorByNote[key.note];
-                const isActive = color.toLowerCase() === value.toLowerCase();
+                const isActive = showPressedColors
+                    ? activeColorSet.has(color.toLowerCase())
+                    : color.toLowerCase() === normalizedValue;
                 const width = 10;
 
                 return (
