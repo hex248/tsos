@@ -8,3 +8,9 @@
 KEY DELIVERABLES:
 - key selection
 - save sound configurations (localStorage)
+- register account
+- save sounds to account
+- when the user stops changing a property, the sample should be played
+- shareable link
+- invert roundness slider (down+left makes it more round)
+- fix fade
