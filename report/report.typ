@@ -63,8 +63,6 @@
 #abstract
 #acknowledgements
 
-= Contents
-
 #outline()
 #pagebreak()
 
