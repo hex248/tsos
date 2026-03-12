@@ -167,6 +167,7 @@ function Index() {
     const centerY = dimensions.height / 2;
 
     const [state, setState] = useShapeState(centerX, centerY);
+    const stateRef = useRef(state);
     const [viewMode, setViewMode] = useState<ViewMode>("edit");
     const [isTutorialOpen, setIsTutorialOpen] = useState(false);
     const [activeKeyboardColors, setActiveKeyboardColors] = useState<string[]>([]);
@@ -174,6 +175,8 @@ function Index() {
         Map<string, { voice: PreviewVoice | null; keys: Set<string>; color: string }>
     >(new Map());
     const keyToNoteRef = useRef<Map<string, string>>(new Map());
+
+    stateRef.current = state;
 
     useEffect(() => {
         try {
@@ -280,54 +283,53 @@ function Index() {
                 return;
             }
 
-            setState((prev) => {
-                const targetOctave = clampOctave(prev.octave + binding.octaveOffset);
-                const color = COLOR_BY_NOTE.get(binding.note) ?? prev.color;
-                const noteKey = `${binding.note}${targetOctave}`;
+            const currentState = stateRef.current;
+            const targetOctave = clampOctave(currentState.octave + binding.octaveOffset);
+            const color = COLOR_BY_NOTE.get(binding.note) ?? currentState.color;
+            const noteKey = `${binding.note}${targetOctave}`;
 
-                keyToNoteRef.current.set(normalizedKey, noteKey);
-                const existingEntry = activeVoicesRef.current.get(noteKey);
-                if (existingEntry) {
-                    existingEntry.keys.add(normalizedKey);
-                } else {
-                    activeVoicesRef.current.set(noteKey, {
-                        voice: null,
-                        keys: new Set([normalizedKey]),
-                        color,
-                    });
-                    void startPreviewVoice({
-                        preset: prev.preset,
-                        roundness: prev.roundness,
-                        size: prev.size,
-                        grain: prev.grain,
-                        attack: prev.attack,
-                        hold: prev.hold,
-                        decay: prev.decay,
-                        sustain: prev.sustain,
-                        wobble: prev.wobble,
-                        wobbleSpeed: prev.wobbleSpeed,
-                        wobbleRandomness: prev.wobbleRandomness,
-                        note: binding.note,
-                        octave: targetOctave,
-                        synthNodes: null,
-                    }).then((voice) => {
-                        const entry = activeVoicesRef.current.get(noteKey);
-                        if (!entry) {
-                            stopPreviewVoice(voice, null);
-                            return;
-                        }
+            keyToNoteRef.current.set(normalizedKey, noteKey);
+            const existingEntry = activeVoicesRef.current.get(noteKey);
+            if (existingEntry) {
+                existingEntry.keys.add(normalizedKey);
+                syncActiveKeyboardColors();
+                return;
+            }
 
-                        entry.voice = voice;
-                        if (entry.keys.size === 0) {
-                            activeVoicesRef.current.delete(noteKey);
-                            stopPreviewVoice(voice, null);
-                        }
-                    });
+            activeVoicesRef.current.set(noteKey, {
+                voice: null,
+                keys: new Set([normalizedKey]),
+                color,
+            });
+            syncActiveKeyboardColors();
+
+            void startPreviewVoice({
+                preset: currentState.preset,
+                roundness: currentState.roundness,
+                size: currentState.size,
+                grain: currentState.grain,
+                attack: currentState.attack,
+                hold: currentState.hold,
+                decay: currentState.decay,
+                sustain: currentState.sustain,
+                wobble: currentState.wobble,
+                wobbleSpeed: currentState.wobbleSpeed,
+                wobbleRandomness: currentState.wobbleRandomness,
+                note: binding.note,
+                octave: targetOctave,
+                synthNodes: null,
+            }).then((voice) => {
+                const entry = activeVoicesRef.current.get(noteKey);
+                if (!entry) {
+                    stopPreviewVoice(voice, null);
+                    return;
                 }
 
-                syncActiveKeyboardColors();
-
-                return prev;
+                entry.voice = voice;
+                if (entry.keys.size === 0) {
+                    activeVoicesRef.current.delete(noteKey);
+                    stopPreviewVoice(voice, null);
+                }
             });
         };
 
@@ -364,7 +366,7 @@ function Index() {
             window.removeEventListener("blur", stopAllVoices);
             stopAllVoices();
         };
-    }, [setState, syncActiveKeyboardColors, toggleMode]);
+    }, [syncActiveKeyboardColors, toggleMode]);
 
     const modeToggleButton = (
         <Button

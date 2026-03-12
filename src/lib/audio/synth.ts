@@ -348,9 +348,7 @@ export function stopPreviewVoice(voice: PreviewVoice, synthNodes: SynthNodes | n
     const releaseAt = Math.max(now, voice.minReleaseAt);
     const stopAt = releaseAt + PREVIEW_RELEASE + PREVIEW_CLEANUP;
 
-    const releaseStartValue = voice.gain.gain.getValueAtTime(releaseAt);
-    voice.gain.gain.cancelScheduledValues(releaseAt);
-    voice.gain.gain.setValueAtTime(releaseStartValue, releaseAt);
+    voice.gain.gain.cancelAndHoldAtTime(releaseAt);
     voice.gain.gain.linearRampToValueAtTime(0, releaseAt + PREVIEW_RELEASE);
 
     voice.oscillatorA.stop(stopAt);
