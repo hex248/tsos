@@ -24,7 +24,7 @@ const CONTROL_META: Record<ControlKind, { label: string; hint: string }> = {
     },
     roundness: {
         label: "Roundness",
-        hint: "Drag up/right to increase",
+        hint: "Drag down/left to increase",
     },
 };
 
@@ -86,7 +86,8 @@ export default function ShapeDomControlPoints({
             const dy = event.clientY - drag.startY;
             const delta = dx - dy;
             const sensitivity = drag.control === "size" ? 0.16 : 0.2;
-            const nextValue = drag.startValue + delta * sensitivity;
+            const direction = drag.control === "roundness" ? -1 : 1;
+            const nextValue = drag.startValue + delta * sensitivity * direction;
             const current = stateRef.current;
             const nextState = setControlValue(current, drag.control, nextValue);
             const clampedValue = getControlValue(nextState, drag.control);
@@ -197,9 +198,9 @@ export default function ShapeDomControlPoints({
                             const step = event.shiftKey ? 10 : 2;
                             let delta = 0;
                             if (event.key === "ArrowUp" || event.key === "ArrowRight") {
-                                delta = step;
+                                delta = control.control === "roundness" ? -step : step;
                             } else if (event.key === "ArrowDown" || event.key === "ArrowLeft") {
-                                delta = -step;
+                                delta = control.control === "roundness" ? step : -step;
                             }
 
                             if (delta === 0) {
