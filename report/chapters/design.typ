@@ -1,7 +1,7 @@
 #let design = [
 = Design
 
-#text(fill: red)[
+/*
 Guidance:
 - 1200 words
 - describe final software structure
@@ -14,5 +14,5 @@ Guidance:
 - use ui design methodology for predominantly ux-based projects
 - include flowcharts, storyboard, and prototypes
 - use the most appropriate diagrams to depict implementation clearly
-]
+*/
 ]

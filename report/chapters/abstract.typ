@@ -18,14 +18,14 @@ The final artefact is a complete web application that demonstrates a coherent sy
 - #highlight[In progress:] Future roadmap definition with sequencer explicitly positioned as post-submission work.
 - #highlight[In progress:] Replace generic results language with concrete evaluation findings and key metrics.
 
-#text(fill: red)[
+/*
 Guidance:
 - 500 words
 - summarise problem statement
 - summarise project aims
 - provide brief description of methodologies, technologies and algorithms
 - provide main solution/results, conclusions and future recommendations
-]
+*/
 
 #pagebreak()
 ]

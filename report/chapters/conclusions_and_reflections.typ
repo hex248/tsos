@@ -1,7 +1,7 @@
 #let conclusions_and_reflections = [
 = Conclusions and Reflections
 
-#text(fill: red)[
+/*
 Guidance:
 - 1000 words
 - provide critical reflections on all aspects of project lifecycle
@@ -10,5 +10,5 @@ Guidance:
 - reflect on strengths and weaknesses of implementation
 - discuss acquisition of new knowledge and skills
 - consider further work and future recommendations
-]
+*/
 ]
