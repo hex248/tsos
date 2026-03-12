@@ -2,7 +2,7 @@ import type { ShapeState } from "@/types/shape";
 import type { ViewMode } from "@/types/viewMode";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type ControlKind = "size" | "roundness";
+type ControlKind = "size" | "roundness" | "wobble";
 
 interface DragState {
     control: ControlKind;
@@ -26,6 +26,10 @@ const CONTROL_META: Record<ControlKind, { label: string; hint: string }> = {
         label: "Roundness",
         hint: "Drag down/left to increase",
     },
+    wobble: {
+        label: "Wobble",
+        hint: "Drag down/left to increase",
+    },
 };
 
 function clampRange(value: number) {
@@ -38,6 +42,8 @@ function getControlValue(state: ShapeState, control: ControlKind): number {
             return state.size;
         case "roundness":
             return state.roundness;
+        case "wobble":
+            return state.wobble;
     }
 }
 
@@ -48,6 +54,8 @@ function setControlValue(state: ShapeState, control: ControlKind, value: number)
             return { ...state, size: next };
         case "roundness":
             return { ...state, roundness: next };
+        case "wobble":
+            return { ...state, wobble: next };
     }
 }
 
@@ -86,7 +94,7 @@ export default function ShapeDomControlPoints({
             const dy = event.clientY - drag.startY;
             const delta = dx - dy;
             const sensitivity = drag.control === "size" ? 0.16 : 0.2;
-            const direction = drag.control === "roundness" ? -1 : 1;
+            const direction = drag.control === "size" ? 1 : -1;
             const nextValue = drag.startValue + delta * sensitivity * direction;
             const current = stateRef.current;
             const nextState = setControlValue(current, drag.control, nextValue);
@@ -138,6 +146,13 @@ export default function ShapeDomControlPoints({
                 x: shapeX,
                 y: shapeY - handleDistance,
                 color: "#93C5FD",
+                disabled: false,
+            },
+            {
+                control: "wobble" as const,
+                x: shapeX - handleDistance,
+                y: shapeY,
+                color: "#D8B4FE",
                 disabled: false,
             },
         ],
@@ -198,9 +213,9 @@ export default function ShapeDomControlPoints({
                             const step = event.shiftKey ? 10 : 2;
                             let delta = 0;
                             if (event.key === "ArrowUp" || event.key === "ArrowRight") {
-                                delta = control.control === "roundness" ? -step : step;
+                                delta = control.control === "size" ? step : -step;
                             } else if (event.key === "ArrowDown" || event.key === "ArrowLeft") {
-                                delta = control.control === "roundness" ? step : -step;
+                                delta = control.control === "size" ? -step : step;
                             }
 
                             if (delta === 0) {
@@ -251,7 +266,7 @@ export default function ShapeDomControlPoints({
                         }}
                     >
                         <span className="text-xs font-semibold leading-none text-black/75">
-                            {control.control === "size" ? "S" : "R"}
+                            {control.control === "size" ? "S" : control.control === "roundness" ? "R" : "W"}
                         </span>
                     </button>
 

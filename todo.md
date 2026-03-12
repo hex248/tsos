@@ -11,6 +11,5 @@ KEY DELIVERABLES:
 - register account
 - save sounds to account
 - shareable link
-- fix fade
-- add wobble to set of control points
 - sample sounds
+- colour goes back to red after pressing any note (stay on last played)
