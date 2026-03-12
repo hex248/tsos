@@ -1,8 +1,7 @@
 import AudioWaveform from "@/components/AudioWaveform";
 import ThemeToggle from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Clock, Home, Settings } from "lucide-react";
+import { Home, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Layout({
@@ -64,32 +63,6 @@ export default function Layout({
                 {viewportLeftOverlay ? (
                     <div className="absolute bottom-4 left-4 z-10">{viewportLeftOverlay}</div>
                 ) : null}
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="absolute top-4 right-4 rounded-full px-4"
-                        >
-                            <Clock className="size-4 mr-1" />
-                            Coming Soon
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle>Coming Soon</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-2">
-                            <div className="space-y-2">
-                                <h4 className="font-medium">Key Selection</h4>
-                                <p className="text-sm text-muted-foreground">
-                                    Allow users to select a musical key (e.g. C Major, A Minor) so the
-                                    keyboard will follow a key, making it easier to create succinct melodies.
-                                </p>
-                            </div>
-                        </div>
-                    </DialogContent>
-                </Dialog>
                 {viewportRightOverlay ? (
                     <div className="absolute bottom-4 right-4 z-10">{viewportRightOverlay}</div>
                 ) : null}

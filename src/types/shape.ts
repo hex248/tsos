@@ -1,3 +1,5 @@
+import type { NoteName, ScaleType } from "@/types/music";
+
 export type Preset = "triangle" | "square";
 
 export interface ShapeState {
@@ -16,4 +18,6 @@ export interface ShapeState {
     sustain: number; // 0-100, envelope sustain level
     color: string; // hex color from clavier keyboard
     octave: number; // 1-8, frequency multiplier
+    keyRoot: NoteName | null;
+    scaleType: ScaleType;
 }

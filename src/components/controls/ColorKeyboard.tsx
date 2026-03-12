@@ -1,8 +1,9 @@
 import { Toggle } from "@/components/ui/toggle";
 import { colorScale } from "@/constants/colorScale";
 import { cn } from "@/lib/utils";
+import type { NoteName } from "@/types/music";
 
-const WHITE_KEYS = ["C", "D", "E", "F", "G", "A", "B"];
+const WHITE_KEYS: NoteName[] = ["C", "D", "E", "F", "G", "A", "B"];
 const BLACK_KEYS = [
     { note: "C#", position: 0 },
     { note: "D#", position: 1 },
@@ -14,29 +15,34 @@ const BLACK_KEYS = [
 export default function ColorKeyboard({
     value,
     activeColors = [],
+    scaleNotes,
     onChange,
 }: {
     value: string;
     activeColors?: string[];
+    scaleNotes?: NoteName[] | null;
     onChange: (color: string) => void;
 }) {
-    const colorByNote = Object.fromEntries(colorScale.map((entry) => [entry.note, entry.color]));
+    const colorByNote = new Map(colorScale.map((entry) => [entry.note, entry.color]));
     const normalizedValue = value.toLowerCase();
     const activeColorSet = new Set(activeColors.map((color) => color.toLowerCase()));
+    const scaleNoteSet = scaleNotes ? new Set(scaleNotes) : null;
     const showPressedColors = activeColorSet.size > 0;
 
     return (
         <div className="relative flex w-full select-none">
             {WHITE_KEYS.map((note) => {
-                const color = colorByNote[note];
+                const color = colorByNote.get(note) ?? colorScale[0].color;
                 const isActive = showPressedColors
                     ? activeColorSet.has(color.toLowerCase())
                     : color.toLowerCase() === normalizedValue;
+                const isDisabled = scaleNoteSet ? !scaleNoteSet.has(note) : false;
 
                 return (
                     <Toggle
                         key={note}
                         pressed={isActive}
+                        disabled={isDisabled}
                         onPressedChange={() => onChange(color)}
                         className={cn(
                             "relative flex flex-1 items-end justify-center rounded-none border border-foreground dark:border-background cursor-pointer",
@@ -44,6 +50,7 @@ export default function ColorKeyboard({
                             note === "C" ? "rounded-l-md" : "",
                             note === "B" ? "rounded-r-md" : "",
                             isActive ? "z-10" : "",
+                            isDisabled ? "cursor-not-allowed opacity-45" : "",
                         )}
                         style={{ backgroundColor: color }}
                         aria-label={`Select ${note}`}
@@ -72,10 +79,11 @@ export default function ColorKeyboard({
             })}
 
             {BLACK_KEYS.map((key) => {
-                const color = colorByNote[key.note];
+                const color = colorByNote.get(key.note) ?? colorScale[0].color;
                 const isActive = showPressedColors
                     ? activeColorSet.has(color.toLowerCase())
                     : color.toLowerCase() === normalizedValue;
+                const isDisabled = scaleNoteSet ? !scaleNoteSet.has(key.note) : false;
                 const width = 10;
 
                 return (
@@ -83,10 +91,11 @@ export default function ColorKeyboard({
                         key={key.note}
                         size="sm"
                         pressed={isActive}
+                        disabled={isDisabled}
                         onPressedChange={() => onChange(color)}
                         className={cn(
                             "absolute top-0 z-20 h-24 rounded-none border border-black min-w-0 px-0 cursor-pointer",
-                            isActive ? "" : "",
+                            isDisabled ? "cursor-not-allowed opacity-45" : "",
                         )}
                         style={{
                             width: `${width}%`,

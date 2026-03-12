@@ -1,5 +1,7 @@
+import { NOTE_INDEX_BY_NAME, type NoteName } from "@/types/music";
+
 export type ColorNote = {
-    note: string;
+    note: NoteName;
     color: string;
     label: string;
 };
@@ -19,27 +21,8 @@ export const colorScale: ColorNote[] = [
     { note: "B", color: "#0c2bff", label: "B" },
 ];
 
-const SEMITONES: Record<string, number> = {
-    C: 0,
-    "C#": 1,
-    D: 2,
-    "D#": 3,
-    E: 4,
-    F: 5,
-    "F#": 6,
-    G: 7,
-    "G#": 8,
-    A: 9,
-    "A#": 10,
-    B: 11,
-};
-
-export function noteToFrequency(note: string, octave: number): number {
-    const semitone = SEMITONES[note];
-    if (semitone === undefined) {
-        throw new Error(`Unsupported note: ${note}`);
-    }
-
+export function noteToFrequency(note: NoteName, octave: number): number {
+    const semitone = NOTE_INDEX_BY_NAME[note];
     const midi = (octave + 1) * 12 + semitone;
     return 440 * 2 ** ((midi - 69) / 12);
 }

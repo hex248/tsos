@@ -9,6 +9,7 @@ import {
     mapSizeToGain,
     mapSustainToGain,
 } from "@/lib/audio/mapping";
+import type { NoteName } from "@/types/music";
 import type { ShapeState } from "@/types/shape";
 import * as Tone from "tone";
 import { createMp3Encoder } from "wasm-media-encoders";
@@ -189,7 +190,7 @@ export function createExportFilename(
     return `the-shape-of-sound-${preset}-${noteSlug}${state.octave}-${envelopeSuffix}.${format}`;
 }
 
-function getNoteFromColor(color: string): string {
+function getNoteFromColor(color: string): NoteName {
     return (
         colorScale.find((entry) => entry.color.toLowerCase() === color.toLowerCase())?.note ??
         colorScale[0].note

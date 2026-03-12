@@ -2,6 +2,7 @@ import ShapeCanvas from "@/components/canvas/ShapeCanvas";
 import ColorKeyboard from "@/components/controls/ColorKeyboard";
 import EnvelopeControls from "@/components/controls/EnvelopeControls";
 import ExportDialog from "@/components/controls/ExportDialog";
+import KeySelector from "@/components/controls/KeySelector";
 import OctaveSelector from "@/components/controls/OctaveSelector";
 import PresetSelector from "@/components/controls/PresetSelector";
 import TutorialDialog from "@/components/controls/TutorialDialog";
@@ -10,7 +11,9 @@ import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { colorScale } from "@/constants/colorScale";
 import { useShapeState } from "@/hooks/useShapeState";
+import { getDiatonicMappedNote, getScaleNotes, isNoteInScale } from "@/lib/audio/keySelection";
 import { type PreviewVoice, playPreviewSample, startPreviewVoice, stopPreviewVoice } from "@/lib/audio/synth";
+import type { NoteName, ScaleType } from "@/types/music";
 import type { ShapeState } from "@/types/shape";
 import type { ViewMode } from "@/types/viewMode";
 import { Info } from "lucide-react";
@@ -62,9 +65,15 @@ const KEY_NOTE_BINDINGS = [
     { key: "0", note: "F", octaveOffset: 2 },
     { key: "-", note: "F#", octaveOffset: 2 },
     { key: "=", note: "G", octaveOffset: 2 },
-];
+] as { key: string; note: NoteName; octaveOffset: number }[];
 
-const KEY_NOTE_MAP = new Map(KEY_NOTE_BINDINGS.map((binding) => [binding.key, binding]));
+type KeyNoteBinding = (typeof KEY_NOTE_BINDINGS)[number];
+
+type IndexedKeyNoteBinding = KeyNoteBinding & { index: number };
+
+const KEY_NOTE_MAP = new Map<string, IndexedKeyNoteBinding>(
+    KEY_NOTE_BINDINGS.map((binding, index) => [binding.key, { ...binding, index }]),
+);
 const COLOR_BY_NOTE = new Map(colorScale.map((entry) => [entry.note, entry.color]));
 const MIN_OCTAVE = 1;
 const MAX_OCTAVE = 8;
@@ -138,11 +147,66 @@ function mixColors(colors: string[]) {
         .padStart(2, "0")}`;
 }
 
-function getNoteFromColor(color: string) {
+function getNoteFromColor(color: string): NoteName {
     return (
         colorScale.find((entry) => entry.color.toLowerCase() === color.toLowerCase())?.note ??
         colorScale[0].note
     );
+}
+
+function getColorForNote(note: NoteName) {
+    return COLOR_BY_NOTE.get(note) ?? colorScale[0].color;
+}
+
+function getStateWithKeySelection(
+    currentState: ShapeState,
+    keyRoot: NoteName | null,
+    scaleType: ScaleType,
+): ShapeState {
+    if (!keyRoot) {
+        return {
+            ...currentState,
+            keyRoot: null,
+            scaleType: "major",
+        };
+    }
+
+    const nextState = {
+        ...currentState,
+        keyRoot,
+        scaleType,
+    };
+
+    const currentNote = getNoteFromColor(currentState.color);
+    if (isNoteInScale(currentNote, keyRoot, scaleType)) {
+        return nextState;
+    }
+
+    return {
+        ...nextState,
+        color: getColorForNote(keyRoot),
+    };
+}
+
+function getMappedKeyboardNote(binding: IndexedKeyNoteBinding, currentState: ShapeState) {
+    if (!currentState.keyRoot) {
+        return {
+            note: binding.note,
+            octave: clampOctave(currentState.octave + binding.octaveOffset),
+        };
+    }
+
+    const mappedNote = getDiatonicMappedNote(
+        binding.index,
+        currentState.keyRoot,
+        currentState.scaleType,
+        clampOctave(currentState.octave - 1),
+    );
+
+    return {
+        note: mappedNote.note,
+        octave: clampOctave(mappedNote.octave),
+    };
 }
 
 function Index() {
@@ -236,6 +300,25 @@ function Index() {
         [playStatePreview],
     );
 
+    const handleKeyRootChange = useCallback(
+        (keyRoot: NoteName | null) => {
+            setState((previousState) =>
+                getStateWithKeySelection(previousState, keyRoot, previousState.scaleType),
+            );
+        },
+        [setState],
+    );
+
+    const handleScaleTypeChange = useCallback(
+        (scaleType: ScaleType) => {
+            setState((previousState) =>
+                getStateWithKeySelection(previousState, previousState.keyRoot, scaleType),
+            );
+        },
+        [setState],
+    );
+
+    const scaleNotes = state.keyRoot ? getScaleNotes(state.keyRoot, state.scaleType) : null;
     const displayedColor = activeKeyboardColors.length > 0 ? mixColors(activeKeyboardColors) : state.color;
 
     useEffect(() => {
@@ -284,9 +367,9 @@ function Index() {
             }
 
             const currentState = stateRef.current;
-            const targetOctave = clampOctave(currentState.octave + binding.octaveOffset);
-            const color = COLOR_BY_NOTE.get(binding.note) ?? currentState.color;
-            const noteKey = `${binding.note}${targetOctave}`;
+            const mappedNote = getMappedKeyboardNote(binding, currentState);
+            const color = getColorForNote(mappedNote.note);
+            const noteKey = `${mappedNote.note}${mappedNote.octave}`;
 
             setState((previousState) =>
                 previousState.color === color ? previousState : { ...previousState, color },
@@ -319,8 +402,8 @@ function Index() {
                 wobble: currentState.wobble,
                 wobbleSpeed: currentState.wobbleSpeed,
                 wobbleRandomness: currentState.wobbleRandomness,
-                note: binding.note,
-                octave: targetOctave,
+                note: mappedNote.note,
+                octave: mappedNote.octave,
                 synthNodes: null,
             }).then((voice) => {
                 const entry = activeVoicesRef.current.get(noteKey);
@@ -433,6 +516,7 @@ function Index() {
                 <ColorKeyboard
                     value={displayedColor}
                     activeColors={activeKeyboardColors}
+                    scaleNotes={scaleNotes}
                     onChange={(color) => {
                         const nextState = { ...state, color };
                         playStatePreview(nextState);
@@ -440,19 +524,30 @@ function Index() {
                     }}
                 />
             </div>
-            <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium">Octave</span>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Raises or lowers the pitch by octaves.</p>
-                        </TooltipContent>
-                    </Tooltip>
+            <div className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-4 items-start">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1">
+                        <span className="text-sm font-medium">Octave</span>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Info className="size-3.5 text-muted-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Raises or lowers the pitch by octaves.</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+                    <OctaveSelector
+                        value={state.octave}
+                        onChange={(octave) => setState({ ...state, octave })}
+                    />
                 </div>
-                <OctaveSelector value={state.octave} onChange={(octave) => setState({ ...state, octave })} />
+                <KeySelector
+                    root={state.keyRoot}
+                    scaleType={state.scaleType}
+                    onRootChange={handleKeyRootChange}
+                    onScaleTypeChange={handleScaleTypeChange}
+                />
             </div>
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">

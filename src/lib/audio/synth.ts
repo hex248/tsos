@@ -12,6 +12,7 @@ import {
     mapWobbleToTremoloDepth,
 } from "@/lib/audio/mapping";
 import { noise2D } from "@/lib/noise";
+import type { NoteName } from "@/types/music";
 import type { Preset } from "@/types/shape";
 import * as Tone from "tone";
 
@@ -73,7 +74,7 @@ type PreviewOptions = {
     wobble: number;
     wobbleSpeed: number;
     wobbleRandomness: number;
-    note: string;
+    note: NoteName;
     octave: number;
     synthNodes: SynthNodes | null;
 };

@@ -17,6 +17,8 @@ const DEFAULT_STATE: ShapeState = {
     sustain: 100,
     color: "#FF0000", // red (C)
     octave: 4, // middle octave
+    keyRoot: null,
+    scaleType: "major",
 };
 
 export function useShapeState(centerX: number, centerY: number) {
