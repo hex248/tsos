@@ -1,5 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { NOTE_NAMES, type NoteName, type ScaleType } from "@/types/music";
+import { Info } from "lucide-react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 
 const NONE_VALUE = "none";
@@ -29,7 +31,20 @@ export default function KeySelector({
 }) {
     return (
         <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium">Key</span>
+            <div className="flex items-center gap-1">
+                <span className="text-sm font-medium">Key</span>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Info className="size-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>
+                            Remaps the computer keyboard to only play notes in the selected major or minor
+                            key.
+                        </p>
+                    </TooltipContent>
+                </Tooltip>
+            </div>
             <Select
                 value={root ?? NONE_VALUE}
                 onValueChange={(value) => onRootChange(value === NONE_VALUE ? null : (value as NoteName))}
