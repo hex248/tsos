@@ -3,7 +3,6 @@
   - next to octave selector
   - <Select /> for root note (None by default)
   - <Select /> for scale type (only visible when note is not "None", Major by default)
-- colours averaged when playing multiple notes
 
 KEY DELIVERABLES:
 - key selection
@@ -12,4 +11,3 @@ KEY DELIVERABLES:
 - save sounds to account
 - shareable link
 - sample sounds
-- colour goes back to red after pressing any note (stay on last played)

@@ -288,6 +288,10 @@ function Index() {
             const color = COLOR_BY_NOTE.get(binding.note) ?? currentState.color;
             const noteKey = `${binding.note}${targetOctave}`;
 
+            setState((previousState) =>
+                previousState.color === color ? previousState : { ...previousState, color },
+            );
+
             keyToNoteRef.current.set(normalizedKey, noteKey);
             const existingEntry = activeVoicesRef.current.get(noteKey);
             if (existingEntry) {
@@ -366,7 +370,7 @@ function Index() {
             window.removeEventListener("blur", stopAllVoices);
             stopAllVoices();
         };
-    }, [syncActiveKeyboardColors, toggleMode]);
+    }, [setState, syncActiveKeyboardColors, toggleMode]);
 
     const modeToggleButton = (
         <Button
