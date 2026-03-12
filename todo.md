@@ -10,7 +10,7 @@ KEY DELIVERABLES:
 - save sound configurations (localStorage)
 - register account
 - save sounds to account
-- when the user stops changing a property, the sample should be played
 - shareable link
 - fix fade
 - add wobble to set of control points
+- sample sounds

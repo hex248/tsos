@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { colorScale } from "@/constants/colorScale";
 import { useShapeState } from "@/hooks/useShapeState";
 import { type PreviewVoice, playPreviewSample, startPreviewVoice, stopPreviewVoice } from "@/lib/audio/synth";
+import type { ShapeState } from "@/types/shape";
 import type { ViewMode } from "@/types/viewMode";
 import { Info } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -137,6 +138,13 @@ function mixColors(colors: string[]) {
         .padStart(2, "0")}`;
 }
 
+function getNoteFromColor(color: string) {
+    return (
+        colorScale.find((entry) => entry.color.toLowerCase() === color.toLowerCase())?.note ??
+        colorScale[0].note
+    );
+}
+
 function Index() {
     const [dimensions, setDimensions] = useState({
         width: window.innerWidth - 320,
@@ -194,6 +202,36 @@ function Index() {
     const syncActiveKeyboardColors = useCallback(() => {
         setActiveKeyboardColors(Array.from(activeVoicesRef.current.values(), (entry) => entry.color));
     }, []);
+
+    const playStatePreview = useCallback((previewState: ShapeState) => {
+        void playPreviewSample({
+            preset: previewState.preset,
+            roundness: previewState.roundness,
+            size: previewState.size,
+            grain: previewState.grain,
+            attack: previewState.attack,
+            hold: previewState.hold,
+            decay: previewState.decay,
+            sustain: previewState.sustain,
+            wobble: previewState.wobble,
+            wobbleSpeed: previewState.wobbleSpeed,
+            wobbleRandomness: previewState.wobbleRandomness,
+            note: getNoteFromColor(previewState.color),
+            octave: previewState.octave,
+            synthNodes: null,
+        });
+    }, []);
+
+    const playAutoPreviewIfIdle = useCallback(
+        (previewState: ShapeState) => {
+            if (activeVoicesRef.current.size > 0) {
+                return;
+            }
+
+            playStatePreview(previewState);
+        },
+        [playStatePreview],
+    );
 
     const displayedColor = activeKeyboardColors.length > 0 ? mixColors(activeKeyboardColors) : state.color;
 
@@ -358,7 +396,18 @@ function Index() {
                         </TooltipContent>
                     </Tooltip>
                 </div>
-                <PresetSelector value={state.preset} onChange={(preset) => setState({ ...state, preset })} />
+                <PresetSelector
+                    value={state.preset}
+                    onChange={(preset) => {
+                        if (preset === state.preset) {
+                            return;
+                        }
+
+                        const nextState = { ...state, preset };
+                        playAutoPreviewIfIdle(nextState);
+                        setState(nextState);
+                    }}
+                />
             </div>
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
@@ -379,28 +428,9 @@ function Index() {
                     value={displayedColor}
                     activeColors={activeKeyboardColors}
                     onChange={(color) => {
-                        const note =
-                            colorScale.find((entry) => entry.color.toLowerCase() === color.toLowerCase())
-                                ?.note ?? colorScale[0].note;
-
-                        void playPreviewSample({
-                            preset: state.preset,
-                            roundness: state.roundness,
-                            size: state.size,
-                            grain: state.grain,
-                            attack: state.attack,
-                            hold: state.hold,
-                            decay: state.decay,
-                            sustain: state.sustain,
-                            wobble: state.wobble,
-                            wobbleSpeed: state.wobbleSpeed,
-                            wobbleRandomness: state.wobbleRandomness,
-                            note,
-                            octave: state.octave,
-                            synthNodes: null,
-                        });
-
-                        setState({ ...state, color });
+                        const nextState = { ...state, color };
+                        playStatePreview(nextState);
+                        setState(nextState);
                     }}
                 />
             </div>
@@ -435,6 +465,7 @@ function Index() {
                     min={0}
                     max={100}
                     onValueChange={([v]) => setState({ ...state, size: v })}
+                    onValueCommit={([size]) => playAutoPreviewIfIdle({ ...state, size })}
                 />
             </div>
             <div className="flex flex-col gap-2">
@@ -457,6 +488,7 @@ function Index() {
                     min={0}
                     max={100}
                     onValueChange={([v]) => setState({ ...state, roundness: v })}
+                    onValueCommit={([roundness]) => playAutoPreviewIfIdle({ ...state, roundness })}
                 />
             </div>
             <div className="flex flex-col gap-2">
@@ -482,6 +514,7 @@ function Index() {
                         sustain: state.sustain,
                     }}
                     onChange={(envelope) => setState({ ...state, ...envelope })}
+                    onCommit={(envelope) => playAutoPreviewIfIdle({ ...state, ...envelope })}
                 />
             </div>
             <div className="flex flex-col gap-2">
@@ -501,6 +534,7 @@ function Index() {
                     min={0}
                     max={100}
                     onValueChange={([v]) => setState({ ...state, wobble: v })}
+                    onValueCommit={([wobble]) => playAutoPreviewIfIdle({ ...state, wobble })}
                 />
             </div>
             <div className="flex flex-col gap-2">
@@ -520,6 +554,7 @@ function Index() {
                     min={0}
                     max={100}
                     onValueChange={([v]) => setState({ ...state, wobbleSpeed: v })}
+                    onValueCommit={([wobbleSpeed]) => playAutoPreviewIfIdle({ ...state, wobbleSpeed })}
                 />
             </div>
             <div className="flex flex-col gap-2">
@@ -541,6 +576,9 @@ function Index() {
                     min={0}
                     max={100}
                     onValueChange={([v]) => setState({ ...state, wobbleRandomness: v })}
+                    onValueCommit={([wobbleRandomness]) =>
+                        playAutoPreviewIfIdle({ ...state, wobbleRandomness })
+                    }
                 />
             </div>
         </div>

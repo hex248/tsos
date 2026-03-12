@@ -10,9 +10,11 @@ type EnvelopeValues = {
 export default function EnvelopeControls({
     values,
     onChange,
+    onCommit,
 }: {
     values: EnvelopeValues;
     onChange: (next: EnvelopeValues) => void;
+    onCommit: (next: EnvelopeValues) => void;
 }) {
     const width = 320;
     const height = 120;
@@ -54,6 +56,7 @@ export default function EnvelopeControls({
                         min={0}
                         max={100}
                         onValueChange={([attack]) => onChange({ ...values, attack })}
+                        onValueCommit={([attack]) => onCommit({ ...values, attack })}
                     />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -63,6 +66,7 @@ export default function EnvelopeControls({
                         min={0}
                         max={100}
                         onValueChange={([hold]) => onChange({ ...values, hold })}
+                        onValueCommit={([hold]) => onCommit({ ...values, hold })}
                     />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -72,6 +76,7 @@ export default function EnvelopeControls({
                         min={0}
                         max={100}
                         onValueChange={([decay]) => onChange({ ...values, decay })}
+                        onValueCommit={([decay]) => onCommit({ ...values, decay })}
                     />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -81,6 +86,7 @@ export default function EnvelopeControls({
                         min={0}
                         max={100}
                         onValueChange={([sustain]) => onChange({ ...values, sustain })}
+                        onValueCommit={([sustain]) => onCommit({ ...values, sustain })}
                     />
                 </div>
             </div>
