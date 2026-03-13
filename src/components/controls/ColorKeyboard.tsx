@@ -79,11 +79,11 @@ export default function ColorKeyboard({
             })}
 
             {BLACK_KEYS.map((key) => {
-                const color = colorByNote.get(key.note) ?? colorScale[0].color;
+                const color = colorByNote.get(key.note as NoteName) ?? colorScale[0].color;
                 const isActive = showPressedColors
                     ? activeColorSet.has(color.toLowerCase())
                     : color.toLowerCase() === normalizedValue;
-                const isDisabled = scaleNoteSet ? !scaleNoteSet.has(key.note) : false;
+                const isDisabled = scaleNoteSet ? !scaleNoteSet.has(key.note as NoteName) : false;
                 const width = 10;
 
                 return (
