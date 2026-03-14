@@ -2,6 +2,11 @@
 = Background
 
 /*
+- overview of all background research conducted for the project:
+  - literature about audio synthesis, synesthesia, visual-audio interaction, and human creativity
+  - similar apps (fl studio, ableton, incredibox, splice beatmaker)
+  - tools (tone.js, web audio api, three.js, konva.js, react, next.js, PostgreSQL)
+
 Guidance:
 - literature survey on the topic
 - existing similar apps
@@ -19,6 +24,12 @@ Guidance:
 */
 
 == Review of projects
+
+// paragraph about fl studio
+
+// paragraph about ableton
+
+// paragraph about incredibox
 
 /*
 Guidance:

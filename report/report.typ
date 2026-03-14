@@ -17,24 +17,23 @@
 #align(center)[
   #text(size: 18pt)[
     6COSC023W
-    \
+    \ \
     Computer Science Final Project
     \
     
     Final Year Project (FYP) - Report
   ]
-  \
+  \ \ \ \
   
-  #text(size: 28pt, weight: "bold")[The Shape of Sound: A Practice-Led Study in Creative Human-Computer Interaction]
-  \
-  
+  #text(size: 36pt, weight: "bold")[The Shape of Sound: A Practice-Led Study in Creative Human-Computer Interaction]
+  \ \ \ \ \
   #text(size:18pt)[
     #text(weight: "bold")[Student: ]Oliver Bryan (w1980003)
     
     #text(weight: "bold")[Supervisor: ] Andrea Martina
     
     #text(weight: "bold")[Degree: ] BEng Software Engineering
-    
+    \ \ \
     School of Computer Science & Engineering
     \
     University of Westminster

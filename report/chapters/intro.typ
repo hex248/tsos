@@ -41,6 +41,7 @@ The Shape of Sound addresses the need for a more intuitive, engaging and accessi
 
 // objectives
 
+A key objective is to investigate how visual properties of a shape can be meaningfully mapped to audio synthesis parameters, drawing on ideas from synesthesia, multisensory experience, and accessible music making. This will involve exploring the visual attributes of shapes (e.g. size, color, shape, movement) and how they can correspond to sound parameters (e.g. gain, pitch, waveform, modulation) in a way that is intuitive, interactive and engaging to users. The project will take form as a web application that allows users to manipulate visual properties of a shape and receive immediate sonic feedback, turning synthesis into an exploratory and novel process, hoping to prove that the visual-first model can reduce the perceived complexity of music production and synthesis as a whole. It should make core sound design concepts more approachable for beginners. The project will also explore how viable a visual-first approach to music production technology can be. This will be evaluated through user testing and reflective analysis, with the goal of demonstrating that a new interface can make audio synthesis more intuitive without harming the creative potential of the tool. Identifying the strengths, limitations, and future development opportunities of the approach will be a key contribution to practice-based HCI research, with the potential to influence innovation in music technology design and education. 
 
 /*
 Guidance:

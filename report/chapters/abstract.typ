@@ -19,6 +19,9 @@ The final artefact is a complete web application that demonstrates a coherent sy
 - #highlight[In progress:] Replace generic results language with concrete evaluation findings and key metrics.
 
 /*
+notes:
+- pad out beginning with anecdotal context on colour-based interface, how it can help those with learning difficulties
+
 Guidance:
 - 500 words
 - summarise problem statement
