@@ -1,3 +1,5 @@
+"use client";
+
 import ShapeCanvas from "@/components/canvas/ShapeCanvas";
 import ColorKeyboard from "@/components/controls/ColorKeyboard";
 import EnvelopeControls from "@/components/controls/EnvelopeControls";

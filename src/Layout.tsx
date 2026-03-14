@@ -1,8 +1,11 @@
+"use client";
+
 import AudioWaveform from "@/components/AudioWaveform";
 import ThemeToggle from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Home, Settings } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Layout({
     children,
@@ -19,7 +22,7 @@ export default function Layout({
     viewportLeftOverlay?: React.ReactNode;
     viewportRightOverlay?: React.ReactNode;
 }) {
-    const location = useLocation();
+    const pathname = usePathname();
 
     return (
         <div className="flex h-screen w-full">
@@ -36,15 +39,15 @@ export default function Layout({
 
                 <div className="flex items-center gap-4">
                     <ThemeToggle className="rounded-lg" />
-                    {location.pathname !== "/settings" && (
-                        <Link to="/settings">
+                    {pathname !== "/settings" && (
+                        <Link href="/settings">
                             <Button variant="ghost" size="icon" className="rounded-lg">
                                 <Settings className="size-6" />
                             </Button>
                         </Link>
                     )}
-                    {location.pathname !== "/" && (
-                        <Link to="/">
+                    {pathname !== "/" && (
+                        <Link href="/">
                             <Button variant="ghost" size="icon" className="rounded-lg">
                                 <Home className="size-6" />
                             </Button>
