@@ -1,3 +1,5 @@
+"use client";
+
 import Layout from "@/Layout";
 
 export default function Settings() {
