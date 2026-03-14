@@ -1,11 +1,8 @@
-"use client";
+import Index from "@/Index";
+import { getServerSession } from "@/lib/auth/server";
 
-import dynamic from "next/dynamic";
+export default async function Page() {
+    const session = await getServerSession();
 
-const IndexPage = dynamic(() => import("@/Index"), {
-    ssr: false,
-});
-
-export default function Page() {
-    return <IndexPage />;
+    return <Index pageMode="root" isAuthenticated={Boolean(session)} />;
 }

@@ -1,9 +1,7 @@
-import type { ShapeState } from "@/types/shape";
+import type { IdeaSoundConfig, ShapeState } from "@/types/shape";
 import { useEffect, useRef, useState } from "react";
 
-const DEFAULT_STATE: ShapeState = {
-    x: 0,
-    y: 0,
+export const DEFAULT_SOUND_CONFIG: IdeaSoundConfig = {
     preset: "square",
     roundness: 0,
     size: 50, // medium
@@ -21,17 +19,26 @@ const DEFAULT_STATE: ShapeState = {
     scaleType: "major",
 };
 
-export function useShapeState(centerX: number, centerY: number) {
-    const [state, setState] = useState<ShapeState>({
-        ...DEFAULT_STATE,
+export function createEditorShapeState(
+    centerX: number,
+    centerY: number,
+    initialConfig?: IdeaSoundConfig,
+): ShapeState {
+    return {
         x: centerX,
         y: centerY,
+        ...DEFAULT_SOUND_CONFIG,
+        ...initialConfig,
+    };
+}
+
+export function useShapeState(centerX: number, centerY: number, initialConfig?: IdeaSoundConfig) {
+    const [state, setState] = useState<ShapeState>({
+        ...createEditorShapeState(centerX, centerY, initialConfig),
     });
 
     const initialStateRef = useRef<ShapeState>({
-        ...DEFAULT_STATE,
-        x: centerX,
-        y: centerY,
+        ...createEditorShapeState(centerX, centerY, initialConfig),
     });
     void initialStateRef;
 

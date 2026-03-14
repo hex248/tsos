@@ -2,9 +2,7 @@ import type { NoteName, ScaleType } from "@/types/music";
 
 export type Preset = "triangle" | "square";
 
-export interface ShapeState {
-    x: number;
-    y: number;
+export interface IdeaSoundConfig {
     preset: Preset;
     roundness: number; // 0-100, controls morph from sharp to round
     size: number; // 0-100, controls volume
@@ -21,3 +19,10 @@ export interface ShapeState {
     keyRoot: NoteName | null;
     scaleType: ScaleType;
 }
+
+export interface EditorShapeState extends IdeaSoundConfig {
+    x: number;
+    y: number;
+}
+
+export type ShapeState = EditorShapeState;

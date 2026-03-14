@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@/App.css";
+import SessionDraftImportBridge from "@/components/ideas/SessionDraftImportBridge";
 
 export const metadata: Metadata = {
     title: "The Shape of Sound",
@@ -19,6 +20,7 @@ export default function RootLayout({
     document.documentElement.classList.toggle("dark", theme === "dark");
 })();`}</script>
                 {children}
+                <SessionDraftImportBridge />
             </body>
         </html>
     );

@@ -1,11 +1,18 @@
-"use client";
+import Settings from "@/Settings";
+import { getSafeRedirectPath } from "@/lib/auth/redirects";
+import { getServerSession } from "@/lib/auth/server";
+import { listIdeasForOwner } from "@/lib/ideas/repository";
+import { serializeIdeaRecord } from "@/lib/ideas/schema";
+import { redirect } from "next/navigation";
 
-import dynamic from "next/dynamic";
+export default async function Page() {
+    const session = await getServerSession();
 
-const SettingsPage = dynamic(() => import("@/Settings"), {
-    ssr: false,
-});
+    if (!session) {
+        redirect(`/login?next=${encodeURIComponent(getSafeRedirectPath("/settings"))}`);
+    }
 
-export default function Page() {
-    return <SettingsPage />;
+    const ideas = await listIdeasForOwner(session.user.id);
+
+    return <Settings ideas={ideas.map(serializeIdeaRecord)} />;
 }

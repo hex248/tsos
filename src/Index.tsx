@@ -15,10 +15,19 @@ import { colorScale } from "@/constants/colorScale";
 import { useShapeState } from "@/hooks/useShapeState";
 import { getDiatonicMappedNote, getScaleNotes, isNoteInScale } from "@/lib/audio/keySelection";
 import { type PreviewVoice, playPreviewSample, startPreviewVoice, stopPreviewVoice } from "@/lib/audio/synth";
+import { createLocalDraftRecord, loadLocalDrafts, saveLocalDrafts } from "@/lib/ideas/local-drafts";
+import {
+    applyIdeaSoundConfig,
+    createIdeaTitle,
+    getNoteFromColor,
+    toIdeaSoundConfig,
+} from "@/lib/ideas/schema";
 import type { NoteName, ScaleType } from "@/types/music";
-import type { ShapeState } from "@/types/shape";
+import type { IdeaSoundConfig, ShapeState } from "@/types/shape";
 import type { ViewMode } from "@/types/viewMode";
 import { Info } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Layout from "./Layout";
 
@@ -70,8 +79,16 @@ const KEY_NOTE_BINDINGS = [
 ] as { key: string; note: NoteName; octaveOffset: number }[];
 
 type KeyNoteBinding = (typeof KEY_NOTE_BINDINGS)[number];
-
+type EditorPageMode = "root" | "public" | "edit";
 type IndexedKeyNoteBinding = KeyNoteBinding & { index: number };
+
+interface IndexProps {
+    pageMode?: EditorPageMode;
+    initialConfig?: IdeaSoundConfig;
+    initialTitle?: string;
+    ideaId?: string;
+    isAuthenticated?: boolean;
+}
 
 const KEY_NOTE_MAP = new Map<string, IndexedKeyNoteBinding>(
     KEY_NOTE_BINDINGS.map((binding, index) => [binding.key, { ...binding, index }]),
@@ -149,13 +166,6 @@ function mixColors(colors: string[]) {
         .padStart(2, "0")}`;
 }
 
-function getNoteFromColor(color: string): NoteName {
-    return (
-        colorScale.find((entry) => entry.color.toLowerCase() === color.toLowerCase())?.note ??
-        colorScale[0].note
-    );
-}
-
 function getColorForNote(note: NoteName) {
     return COLOR_BY_NOTE.get(note) ?? colorScale[0].color;
 }
@@ -211,7 +221,22 @@ function getMappedKeyboardNote(binding: IndexedKeyNoteBinding, currentState: Sha
     };
 }
 
-function Index() {
+function formatPercent(value: number) {
+    return `${Math.round(value)}%`;
+}
+
+export default function Index({
+    pageMode = "root",
+    initialConfig,
+    initialTitle,
+    ideaId,
+    isAuthenticated = false,
+}: IndexProps) {
+    const router = useRouter();
+    const isReadOnly = pageMode === "public";
+    const isEditIdeaPage = pageMode === "edit";
+    const isRootPage = pageMode === "root";
+
     const [dimensions, setDimensions] = useState({
         width: window.innerWidth - 320,
         height: window.innerHeight,
@@ -232,19 +257,29 @@ function Index() {
     const centerX = dimensions.width / 2;
     const centerY = dimensions.height / 2;
 
-    const [state, setState] = useShapeState(centerX, centerY);
+    const [state, setState] = useShapeState(centerX, centerY, initialConfig);
     const stateRef = useRef(state);
-    const [viewMode, setViewMode] = useState<ViewMode>("edit");
+    const [viewMode, setViewMode] = useState<ViewMode>(isReadOnly ? "view" : "edit");
     const [isTutorialOpen, setIsTutorialOpen] = useState(false);
     const [activeKeyboardColors, setActiveKeyboardColors] = useState<string[]>([]);
+    const [statusMessage, setStatusMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [isPersisting, setIsPersisting] = useState(false);
+    const [ideaTitle, setIdeaTitle] = useState(initialTitle ?? "");
+    const [isGuestIdeaHydrated, setIsGuestIdeaHydrated] = useState(!(isRootPage && !isAuthenticated));
     const activeVoicesRef = useRef<
         Map<string, { voice: PreviewVoice | null; keys: Set<string>; color: string }>
     >(new Map());
     const keyToNoteRef = useRef<Map<string, string>>(new Map());
+    const guestIdeaLocalIdRef = useRef<string | null>(null);
 
     stateRef.current = state;
 
     useEffect(() => {
+        if (isReadOnly || !isRootPage) {
+            return;
+        }
+
         try {
             if (!localStorage.getItem(TUTORIAL_STORAGE_KEY)) {
                 setIsTutorialOpen(true);
@@ -252,11 +287,46 @@ function Index() {
         } catch {
             setIsTutorialOpen(true);
         }
-    }, []);
+    }, [isReadOnly, isRootPage]);
+
+    useEffect(() => {
+        if (!isRootPage || isAuthenticated) {
+            setIsGuestIdeaHydrated(true);
+            return;
+        }
+
+        const [storedIdea] = loadLocalDrafts();
+        if (storedIdea) {
+            guestIdeaLocalIdRef.current = storedIdea.localId;
+            setState((previousState) => applyIdeaSoundConfig(previousState, storedIdea.config));
+        }
+
+        setIsGuestIdeaHydrated(true);
+    }, [isAuthenticated, isRootPage, setState]);
+
+    useEffect(() => {
+        if (!isRootPage || isAuthenticated || !isGuestIdeaHydrated) {
+            return;
+        }
+
+        const nextIdea = createLocalDraftRecord(toIdeaSoundConfig(state));
+
+        if (guestIdeaLocalIdRef.current) {
+            nextIdea.localId = guestIdeaLocalIdRef.current;
+        } else {
+            guestIdeaLocalIdRef.current = nextIdea.localId;
+        }
+
+        saveLocalDrafts([nextIdea]);
+    }, [isAuthenticated, isGuestIdeaHydrated, isRootPage, state]);
 
     const toggleMode = useCallback(() => {
+        if (isReadOnly) {
+            return;
+        }
+
         setViewMode((prev) => (prev === "view" ? "edit" : "view"));
-    }, []);
+    }, [isReadOnly]);
 
     const handleTutorialOpenChange = useCallback((open: boolean) => {
         setIsTutorialOpen(open);
@@ -322,6 +392,8 @@ function Index() {
 
     const scaleNotes = state.keyRoot ? getScaleNotes(state.keyRoot, state.scaleType) : null;
     const displayedColor = activeKeyboardColors.length > 0 ? mixColors(activeKeyboardColors) : state.color;
+    const currentConfig = toIdeaSoundConfig(state);
+    const publicTitle = initialTitle ?? createIdeaTitle(currentConfig);
 
     useEffect(() => {
         const stopAllVoices = () => {
@@ -342,7 +414,7 @@ function Index() {
             }
 
             if (event.key === "Tab") {
-                if (canToggleModeWithTab(event.target)) {
+                if (!isReadOnly && canToggleModeWithTab(event.target)) {
                     event.preventDefault();
                     toggleMode();
                 }
@@ -455,9 +527,79 @@ function Index() {
             window.removeEventListener("blur", stopAllVoices);
             stopAllVoices();
         };
-    }, [setState, syncActiveKeyboardColors, toggleMode]);
+    }, [isReadOnly, setState, syncActiveKeyboardColors, toggleMode]);
 
-    const modeToggleButton = (
+    const handleCreateIdea = useCallback(async () => {
+        setIsPersisting(true);
+        setStatusMessage(null);
+        setErrorMessage(null);
+
+        try {
+            const response = await fetch("/api/ideas", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    config: toIdeaSoundConfig(state),
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("save failed");
+            }
+
+            const payload = (await response.json()) as {
+                idea: {
+                    id: string;
+                };
+            };
+
+            router.push(`/ideas/${payload.idea.id}/edit`);
+        } catch {
+            setErrorMessage("This idea could not be saved right now.");
+        } finally {
+            setIsPersisting(false);
+        }
+    }, [router, state]);
+
+    const handleUpdateIdea = useCallback(async () => {
+        if (!ideaId) {
+            return;
+        }
+
+        const trimmedTitle = ideaTitle.trim() || publicTitle;
+
+        setIsPersisting(true);
+        setStatusMessage(null);
+        setErrorMessage(null);
+
+        try {
+            const response = await fetch(`/api/ideas/${ideaId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    title: trimmedTitle,
+                    config: toIdeaSoundConfig(state),
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("update failed");
+            }
+
+            setIdeaTitle(trimmedTitle);
+            setStatusMessage("Saved idea changes.");
+        } catch {
+            setErrorMessage("This idea could not be updated right now.");
+        } finally {
+            setIsPersisting(false);
+        }
+    }, [ideaId, ideaTitle, publicTitle, state]);
+
+    const modeToggleButton = !isReadOnly ? (
         <Button
             variant={viewMode === "edit" ? "default" : "outline"}
             size="sm"
@@ -468,21 +610,68 @@ function Index() {
         >
             Mode: {viewMode === "view" ? "View" : "Edit"}
         </Button>
-    );
+    ) : null;
 
-    const sidebarContent = (
+    const controlsSidebarContent = (
         <div className="flex flex-col gap-4">
+            {isEditIdeaPage ? (
+                <div className="space-y-2 rounded-md border bg-muted/20 p-3">
+                    <p className="text-sm font-medium">Idea title</p>
+                    <input
+                        type="text"
+                        value={ideaTitle}
+                        onChange={(event) => setIdeaTitle(event.target.value)}
+                        className="h-9 w-full rounded-md border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                        placeholder="Idea title"
+                    />
+                    <div className="flex gap-2">
+                        <Button asChild type="button" variant="outline" size="sm">
+                            <Link href={`/ideas/${ideaId}`}>Open Public View</Link>
+                        </Button>
+                    </div>
+                </div>
+            ) : null}
+
+            {isRootPage && !isAuthenticated ? (
+                <div className="space-y-2 rounded-md border bg-muted/20 p-3 text-sm">
+                    <p className="font-medium">Create an account to keep this idea</p>
+                    <p className="text-muted-foreground">
+                        This browser keeps your current sound while you explore. Sign in or register to move
+                        it into your account and keep it shareable by URL.
+                    </p>
+                    <div className="flex gap-2">
+                        <Button asChild type="button" variant="outline" size="sm">
+                            <Link href="/login">Sign in</Link>
+                        </Button>
+                        <Button asChild type="button" size="sm">
+                            <Link href="/register">Register</Link>
+                        </Button>
+                    </div>
+                </div>
+            ) : null}
+
+            {statusMessage ? (
+                <div className="rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-900 dark:text-emerald-100">
+                    {statusMessage}
+                </div>
+            ) : null}
+            {errorMessage ? (
+                <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+                    {errorMessage}
+                </div>
+            ) : null}
+
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">Shape</span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                            <Info className="size-3.5 cursor-help text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>
                                 The oscillator waveform. Square = square wave, Triangle = sawtooth. Use
-                                Roundness to morph toward a smoother tone (sine wave).
+                                Roundness to morph toward a smoother tone.
                             </p>
                         </TooltipContent>
                     </Tooltip>
@@ -505,7 +694,7 @@ function Index() {
                     <span className="text-sm font-medium">Note/Colour</span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                            <Info className="size-3.5 cursor-help text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>
@@ -526,13 +715,13 @@ function Index() {
                     }}
                 />
             </div>
-            <div className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-4 items-start">
+            <div className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] items-start gap-4">
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-1">
                         <span className="text-sm font-medium">Octave</span>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Info className="size-3.5 text-muted-foreground cursor-help" />
+                                <Info className="size-3.5 cursor-help text-muted-foreground" />
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>Raises or lowers the pitch by octaves.</p>
@@ -556,10 +745,10 @@ function Index() {
                     <span className="text-sm font-medium">Size</span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                            <Info className="size-3.5 cursor-help text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>Controls how loud the sound is (gain).</p>
+                            <p>Controls how loud the sound is.</p>
                         </TooltipContent>
                     </Tooltip>
                 </div>
@@ -567,7 +756,7 @@ function Index() {
                     value={[state.size]}
                     min={0}
                     max={100}
-                    onValueChange={([v]) => setState({ ...state, size: v })}
+                    onValueChange={([value]) => setState({ ...state, size: value })}
                     onValueCommit={([size]) => playAutoPreviewIfIdle({ ...state, size })}
                 />
             </div>
@@ -576,13 +765,10 @@ function Index() {
                     <span className="text-sm font-medium">Roundness</span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                            <Info className="size-3.5 cursor-help text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>
-                                Blends the sound from sharp to smooth (100% roundness is a sine wave, 0%
-                                roundness is the shape/wave you selected).
-                            </p>
+                            <p>Blends the sound from sharp to smooth. 100% roundness becomes a sine wave.</p>
                         </TooltipContent>
                     </Tooltip>
                 </div>
@@ -590,7 +776,7 @@ function Index() {
                     value={[state.roundness]}
                     min={0}
                     max={100}
-                    onValueChange={([v]) => setState({ ...state, roundness: v })}
+                    onValueChange={([value]) => setState({ ...state, roundness: value })}
                     onValueCommit={([roundness]) => playAutoPreviewIfIdle({ ...state, roundness })}
                 />
             </div>
@@ -599,7 +785,7 @@ function Index() {
                     <span className="text-sm font-medium">Sound Shape</span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                            <Info className="size-3.5 cursor-help text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>
@@ -625,7 +811,7 @@ function Index() {
                     <span className="text-sm font-medium">Wobble</span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                            <Info className="size-3.5 cursor-help text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>Controls tremolo depth by modulating volume over time.</p>
@@ -636,7 +822,7 @@ function Index() {
                     value={[state.wobble]}
                     min={0}
                     max={100}
-                    onValueChange={([v]) => setState({ ...state, wobble: v })}
+                    onValueChange={([value]) => setState({ ...state, wobble: value })}
                     onValueCommit={([wobble]) => playAutoPreviewIfIdle({ ...state, wobble })}
                 />
             </div>
@@ -645,7 +831,7 @@ function Index() {
                     <span className="text-sm font-medium">Wobble Speed</span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                            <Info className="size-3.5 cursor-help text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>Controls tremolo rate in Hz.</p>
@@ -656,7 +842,7 @@ function Index() {
                     value={[state.wobbleSpeed]}
                     min={0}
                     max={100}
-                    onValueChange={([v]) => setState({ ...state, wobbleSpeed: v })}
+                    onValueChange={([value]) => setState({ ...state, wobbleSpeed: value })}
                     onValueCommit={([wobbleSpeed]) => playAutoPreviewIfIdle({ ...state, wobbleSpeed })}
                 />
             </div>
@@ -665,7 +851,7 @@ function Index() {
                     <span className="text-sm font-medium">Wobble Randomness</span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                            <Info className="size-3.5 cursor-help text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>
@@ -678,7 +864,7 @@ function Index() {
                     value={[state.wobbleRandomness]}
                     min={0}
                     max={100}
-                    onValueChange={([v]) => setState({ ...state, wobbleRandomness: v })}
+                    onValueChange={([value]) => setState({ ...state, wobbleRandomness: value })}
                     onValueCommit={([wobbleRandomness]) =>
                         playAutoPreviewIfIdle({ ...state, wobbleRandomness })
                     }
@@ -687,23 +873,177 @@ function Index() {
         </div>
     );
 
+    const readOnlySidebarContent = (
+        <div className="space-y-4">
+            <div className="space-y-1">
+                <h2 className="text-xl font-semibold">{publicTitle}</h2>
+                <p className="text-sm text-muted-foreground">
+                    This idea is public by URL. Playback and export stay enabled, but editing is disabled.
+                </p>
+            </div>
+
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">Note/Colour</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="size-3.5 cursor-help text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>
+                                Inspired by the clavier a lumieres, a light keyboard that linked notes to
+                                colour.
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
+                <ColorKeyboard
+                    value={displayedColor}
+                    activeColors={activeKeyboardColors}
+                    scaleNotes={scaleNotes}
+                    onChange={(color) => {
+                        const nextState = { ...state, color };
+                        playStatePreview(nextState);
+                        setState(nextState);
+                    }}
+                />
+            </div>
+
+            <div className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] items-start gap-4">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1">
+                        <span className="text-sm font-medium">Octave</span>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Info className="size-3.5 cursor-help text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Raises or lowers the pitch by octaves.</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+                    <OctaveSelector
+                        value={state.octave}
+                        onChange={(octave) => setState({ ...state, octave })}
+                    />
+                </div>
+                <KeySelector
+                    root={state.keyRoot}
+                    scaleType={state.scaleType}
+                    onRootChange={handleKeyRootChange}
+                    onScaleTypeChange={handleScaleTypeChange}
+                />
+            </div>
+
+            <div className="space-y-3 rounded-md border bg-muted/20 p-3 text-sm">
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium">Preset</span>
+                    <span className="capitalize">{state.preset}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium">Note</span>
+                    <span>
+                        {getNoteFromColor(state.color)}
+                        {state.octave}
+                    </span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium">Key</span>
+                    <span>{state.keyRoot ? `${state.keyRoot} ${state.scaleType}` : "Chromatic"}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium">Size</span>
+                    <span>{formatPercent(state.size)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium">Roundness</span>
+                    <span>{formatPercent(state.roundness)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium">Grain</span>
+                    <span>{formatPercent(state.grain)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium">Wobble</span>
+                    <span>{formatPercent(state.wobble)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium">Wobble Speed</span>
+                    <span>{formatPercent(state.wobbleSpeed)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium">Wobble Randomness</span>
+                    <span>{formatPercent(state.wobbleRandomness)}</span>
+                </div>
+            </div>
+
+            <div className="space-y-2 rounded-md border bg-muted/20 p-3 text-sm">
+                <p className="font-medium">Envelope</p>
+                <div className="flex items-center justify-between gap-4">
+                    <span>Attack</span>
+                    <span>{formatPercent(state.attack)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span>Hold</span>
+                    <span>{formatPercent(state.hold)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span>Decay</span>
+                    <span>{formatPercent(state.decay)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span>Sustain</span>
+                    <span>{formatPercent(state.sustain)}</span>
+                </div>
+            </div>
+        </div>
+    );
+
+    const actionButtons = (
+        <div className="flex flex-wrap items-center justify-end gap-2">
+            {isRootPage && isAuthenticated ? (
+                <Button
+                    type="button"
+                    size="sm"
+                    className="rounded-full px-4"
+                    onClick={handleCreateIdea}
+                    disabled={isPersisting}
+                >
+                    {isPersisting ? "Saving..." : "Save Idea"}
+                </Button>
+            ) : null}
+            {isEditIdeaPage ? (
+                <Button
+                    type="button"
+                    size="sm"
+                    className="rounded-full px-4"
+                    onClick={handleUpdateIdea}
+                    disabled={isPersisting}
+                >
+                    {isPersisting ? "Saving..." : "Save Changes"}
+                </Button>
+            ) : null}
+            <ExportDialog state={state} />
+        </div>
+    );
+
     return (
         <Layout
-            sidebarContent={sidebarContent}
+            sidebarContent={isReadOnly ? readOnlySidebarContent : controlsSidebarContent}
             waveformColor={displayedColor}
             viewportTopLeftOverlay={
-                <TutorialDialog open={isTutorialOpen} onOpenChange={handleTutorialOpenChange} />
+                isRootPage ? (
+                    <TutorialDialog open={isTutorialOpen} onOpenChange={handleTutorialOpenChange} />
+                ) : null
             }
             viewportLeftOverlay={modeToggleButton}
-            viewportRightOverlay={<ExportDialog state={state} />}
+            viewportRightOverlay={actionButtons}
         >
             <ShapeCanvas
                 state={{ ...state, color: displayedColor }}
-                onStateChange={setState}
-                mode={viewMode}
+                onStateChange={isReadOnly ? () => undefined : setState}
+                mode={isReadOnly ? "view" : viewMode}
             />
         </Layout>
     );
 }
-
-export default Index;
