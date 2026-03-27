@@ -9,5 +9,7 @@ Guidance:
 - if no tables, delete this page
 */
 
+#outline(title: none, target: figure.where(kind: table))
+
 #pagebreak()
 ]
