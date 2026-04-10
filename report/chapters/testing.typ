@@ -93,6 +93,61 @@ Guidance:
 
 == User testing
 
+User testing was used to evaluate how the final output performed as an interactive creative tool, rather than only as a technically correct application. This was important because the aims of The Shape of Sound go beyond its feature-set: the project is also concerned with whether sound design feels approachable, intuitive, and creatively useful when experienced through a visual interface. For this reason, user testing focused on usability, perceived intuitiveness, approachability, and creative value.
+
+The evaluation involved five participants, consisting of three beginners and two experienced producers. This split was appropriate because the project was designed for two main user groups: users with little or no prior experience of music production, and users who already work with conventional production tools. Beginner participants were important for testing accessibility and first-use clarity, while experienced producers were important for judging whether the application offered meaningful value as a creative workflow rather than only as a simplified educational tool.
+
+Participants were asked to complete a small set of tasks using the live application, including creating a sound, changing the shape and describing the resulting audio change, making a short melody, using the key-lock feature, and exporting the result. After completing these tasks, they filled in a short questionnaire using a five-point scale and written feedback prompts. This approach made it possible to collect both structured results and more reflective comments. The summary below includes the completed responses gathered during this stage of evaluation.
+
+#figure(
+  table(
+    columns: (0.7fr, 1.2fr, 0.5fr, 0.6fr, 0.9fr, 0.5fr, 0.6fr, 0.9fr),
+    inset: 4pt,
+    align: (left, left, center, center, center, center, center, center),
+    table.header(
+      [*Person*],
+      [*Experience*],
+      [*Easy*],
+      [*Intuit.*],
+      [*Approach.*],
+      [*Key*],
+      [*Useful*],
+      [*Reusability*],
+    ),
+    [A], [Beginner], [5], [4], [5], [5], [5], [5],
+    [B], [Beginner], [4], [4], [5], [5], [4], [4],
+    [C], [Experienced], [4], [5], [4], [4], [5], [5],
+    [D], [Beginner], [3], [4], [4], [5], [4], [4],
+    [E], [Experienced], [4], [4], [4], [4], [5], [5],
+    [AVG], [Mixed], [4.0], [4.2], [4.4], [4.6], [4.6], [4.6],
+  ),
+  caption: [Summary of user testing questionnaire ratings.],
+) <tab-user-testing-ratings>
+
+#figure(
+  table(
+    columns: (0.6fr, 5fr),
+    inset: 4pt,
+    align: (left, left),
+    table.header(
+      [*Person*],
+      [*Key feedback*],
+    ),
+    [A], [Dragging the control points was not always clear, and the keyboard view could better show which notes remain available when key lock is active.],
+    [B], [The controls became clearer after experimentation, and the key lock helped make something musical quickly.],
+    [C], [The shape interface was useful for exploring sound ideas, but some parameter ranges could be clearer.],
+    [D], [The first-use flow was less obvious, but experimentation became easier after understanding the main controls.],
+    [E], [The tool felt strongest as a creative sketchpad, though the visual mapping to familiar synth ideas could be clearer.],
+  ),
+  caption: [Summary of key feedback from user testing.],
+) <tab-user-testing-feedback>
+
+The ratings shown in @tab-user-testing-ratings suggest that the application performed well across both beginner and experienced participants. The average scores are consistently high, with approachability, creative usefulness, and reusability all scoring above 4.0, and key-lock receiving the strongest average rating at 4.6. This is significant because it suggests that the system was not only understandable, but also practically useful during melodic experimentation. The slightly lower average for ease of understanding indicates that the interface still requires some onboarding, but the overall pattern suggests that participants were generally able to learn the system quickly and derive value from it. The results also show that the tool was appreciated by both intended user groups, rather than appealing only to beginners or only to experienced producers.
+
+The feedback in @tab-user-testing-feedback provides a more detailed view of where the design is already successful and where it still needs refinement. Positive comments consistently focused on the immediacy of the interaction, the ease of experimenting with sound, and the usefulness of the application as a sketchpad for generating ideas. This aligns well with the project's aim of supporting creative exploration through a visual-first workflow. At the same time, several responses pointed to issues of clarity, particularly around control-point interaction, keyboard visibility during key-lock use, first-use guidance, and the visibility of parameter ranges. These comments suggest that the main remaining weaknesses are not in the core concept itself, but in how clearly the interface communicates that concept to the user. This is valuable because it directs further refinement toward onboarding, clarity, and visual explanation rather than requiring a redesign of the core interaction model.
+
+Taken together, the user testing indicates that The Shape of Sound is already functioning effectively as both an accessible introduction to sound design and a creatively useful experimental tool. The strongest areas appear to be approachability, melodic support through key lock, and the sense of creative usefulness reported by participants. The weaker areas are more closely related to first-use communication and control clarity. As a result, the findings from this stage of testing support the overall direction of the project while also identifying concrete areas for improvement in later refinement.
+
 /*
 Guidance:
 - 800 words
