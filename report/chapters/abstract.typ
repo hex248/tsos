@@ -3,25 +3,15 @@
 
 The Shape of Sound is a practice-led project that investigates whether a synesthetic, visual-first interface can make sound synthesis more intuitive without reducing creative depth.
 
-The project aims to address a common split in music software: powerful professional tools often require specialist technical knowledge, while beginner-friendly tools are accessible but offer limited control over how sound is shaped. In response, this project offers a web-based application where users manipulate visual properties and receive immediate sonic feedback, turning synthesis interaction into a more exploratory and engaging process.
+The project responds to a common split in music software: professional tools provide extensive control but often require specialist knowledge, while beginner-friendly tools are accessible but offer limited influence over how sound is actually shaped. It also responds to creative block in more experienced producers by exploring whether an alternative interaction model can make early-stage sound design feel more inviting and exploratory. In response, the project presents a web-based application in which users manipulate visual properties and receive immediate sonic feedback, turning synthesis into a more direct and engaging process.
 
-The study combines iterative design practice, implementation, and reflective analysis. Early development included a 2D Konva JS based interface submitted at IPD stage. Some reflection led to a re-exploration in 3D to better support spatial interaction and expressive shape manipulation. The final implementation uses Next.js 15 for interface architecture, Three.js with React Three Fiber for interactive graphics, and Tone.js for browser-based synthesis. Core mappings connect shape preset, colour/note, octave, size, roundness, wobble, and envelope parameters to audible synthesis behaviour, with real-time keyboard triggering and export support.
+The study combines iterative design practice, implementation, and reflective analysis. Development moved through multiple stages, including an earlier 2D Konva-based interface submitted at IPD stage, before returning to a final 3D implementation that better supported spatial interaction and expressive manipulation. The completed system uses Next.js for application structure, Three.js for the visual interface, and Tone.js with the Web Audio API for browser-based synthesis. Core mappings connect preset, colour/note, octave, size, roundness, wobble, and envelope behaviour to audible change, while supporting product features such as account-based saving, public idea access, and browser-side WAV/MP3 export extend the tool beyond a purely experimental prototype.
 
-The final artefact is a complete web application that demonstrates a coherent synesthetic workflow for creative sound design, combining real-time visual interaction, synthesis control, and export functionality. Evaluation results show that participants were able to create and modify sounds quickly, and that the visual mapping reduced perceived complexity when compared with parameter-first interaction. The project offers a grounded approach to translating shape interaction into sound design control, and reflects on how iterative prototyping can balance accessibility with creative depth. Future work is focused on extending the feature set, with sequencer functionality intentionally positioned as post-submission development.
+The final artefact is therefore a complete web application rather than only a proof of concept. Functional testing confirmed that the main user-facing flows behaved correctly, including shape-based sound creation, real-time parameter response, scale-aware note input, save/load behaviour, export, and public playback access. A structured user evaluation with five participants, including three beginners and two experienced producers, found consistently positive results. Average ratings were 4/5 for ease of understanding, 4.2/5 for intuitiveness, 4.4/5 for approachability, and 4.6/5 for key-lock usefulness, creative usefulness, and likelihood of reuse. Qualitative feedback highlighted the immediacy of sound exploration and the usefulness of the tool as an idea-generation sketchpad, while also identifying remaining weaknesses in first-use clarity, control-point visibility, and keyboard feedback.
 
-*Current in-progress items (to complete and update later):*
-
-- #highlight[In progress:] Full product completion and integration polish across interaction, audio, and export flows.
-- #highlight[In progress:] Formal user evaluation design, participant sessions, and results analysis.
-- #highlight[In progress:] End-to-end testing, bug fixing, and performance/usability validation.
-- #highlight[In progress:] Final reflective analysis linking outcomes to research questions.
-- #highlight[In progress:] Future roadmap definition with sequencer explicitly positioned as post-submission work.
-- #highlight[In progress:] Replace generic results language with concrete evaluation findings and key metrics.
+Taken together, these outcomes suggest that a visual-first synthesis interface can reduce perceived complexity while still supporting meaningful creative exploration. The project therefore contributes both a working sound-design tool and a practice-led account of how iterative prototyping can balance accessibility, educational value, and creative depth in music technology. It also shows that visual interaction can function as more than decoration, becoming an organising principle for sound creation itself. Future work is focused on refinement rather than redefining the core concept, with the sequencer positioned explicitly as post-submission development.
 
 /*
-notes:
-- pad out beginning with anecdotal context on colour-based interface, how it can help those with learning difficulties
-
 Guidance:
 - 500 words
 - summarise problem statement
