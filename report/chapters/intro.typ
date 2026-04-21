@@ -20,9 +20,6 @@ From my own research, I found that \~66% of beginners surveyed felt that music p
 ) <fig-daw-complicated>
 
 /*
-*NOTES*:
-- need 220 more words
-
 Guidance:
 - 500 words
 - background on the problem
