@@ -57,6 +57,7 @@
 #import "chapters/tools_and_implementation.typ": tools_and_implementation
 #import "chapters/testing.typ": testing
 #import "chapters/conclusions_and_reflections.typ": conclusions_and_reflections
+#import "chapters/appendix.typ": appendix
 
 #declaration
 #abstract
@@ -82,3 +83,5 @@
 #conclusions_and_reflections
 
 #bibliography("bibliography.bib")
+
+#appendix
