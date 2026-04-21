@@ -50,7 +50,65 @@ Incredibox is an important precedent for visual-first music creation because it 
 
 Synesthesia.live is relevant because it treats visual interaction as a serious creative practice and supports advanced audio-reactive visual systems, even though it mainly maps sound into visuals rather than visuals into sound @synesthesia_official_2026 @synesthesia_features_2026. This is important because it demonstrates that visuality in music tools does not have to be superficial. Visual systems can become expressive instruments in their own right, capable of supporting high level creative work. However, Synesthesia.live is ultimately focused on visual performance and audio-reactive output rather than helping users understand or shape sound itself. In this sense, it is not a direct solution to the problem addressed by this project. Its value as a comparison lies in showing that visual interaction can carry real artistic seriousness, while The Shape of Sound inverts the more common audiovisual relationship by using visual interaction as the means of creating and controlling sound.
 
-Together, these products reveal a gap between complex professional tools that offer depth but require significant production literacy, and highly accessible visual tools that remain limited in direct sound design control @imageline_flstudio_home_2026 @ableton_live_manual_welcome_2026 @incredibox_official_2026 @splice_beatmaker_official_2026. This gap is where The Shape of Sound is positioned, as a visual-first and web-based synthesis tool that aims to be approachable without becoming toy-like. The comparisons between the types of existing tools justify the need for a tool that can combine the immediacy of visual interaction with the depth of synthesis control, while also being appealing to users with existing music production experience, not just new users. By filling this gap, the project can provide a unique and valuable tool for both learning and creative expression in music production.
+Together, these products reveal a gap between complex professional tools that offer depth but require significant production literacy, and highly accessible visual tools that remain limited in direct sound design control @imageline_flstudio_home_2026 @ableton_live_manual_welcome_2026 @incredibox_official_2026 @splice_beatmaker_official_2026. This gap is where The Shape of Sound is positioned, as a visual-first and web-based synthesis tool that aims to be approachable without becoming toy-like. The comparisons between the types of existing tools justify the need for a tool that can combine the immediacy of visual interaction with the depth of synthesis control, while also being appealing to users with existing music production experience, not just new users. As shown in @tab-project-comparison, the project occupies a space between beginner-friendly visual immediacy and the deeper synthesis control usually associated with professional tools. By filling this gap, the project can provide a unique and valuable tool for both learning and creative expression in music production.
+
+#figure(
+  table(
+    columns: (1.6fr, 1.2fr, 1.3fr, 1fr, 1fr, 1.7fr),
+    inset: 6pt,
+    align: (left, left, left, center, center, left),
+    table.header(
+      [*Product*],
+      [*Platform / type*],
+      [*Primary interaction*],
+      [*Beginner access*],
+      [*Synthesis depth*],
+      [*Key relevance to this project*],
+    ),
+    [FL Studio],
+    [Desktop DAW],
+    [Pattern, piano-roll, plugin workflow],
+    [Low],
+    [High],
+    [Shows that depth often comes with complexity and a steeper learning curve.],
+
+    [Ableton Live],
+    [Desktop DAW],
+    [Clip-based and live-oriented workflow],
+    [Moderate],
+    [High],
+    [DAW workflow built on conventional production logic.],
+
+    [Incredibox],
+    [Web / app],
+    [Visual drag-and-drop loop building],
+    [Very high],
+    [Low],
+    [Demonstrates strong visual immediacy, but limited direct control over sound design.],
+
+    [Splice Beatmaker],
+    [Web app],
+    [Grid-based sample sequencing],
+    [High],
+    [Low],
+    [Value of low-friction browser creation, sample-driven rather than synthesis-driven.],
+
+    [Synesthesia.live],
+    [Desktop audiovisual tool],
+    [Audio-reactive visual performance],
+    [Moderate],
+    [N/A],
+    [Visual interaction can be done, but maps in the opposite direction.],
+
+    [The Shape of Sound],
+    [Web app],
+    [Shape-led visual sound design],
+    [High],
+    [Moderate],
+    [Occupies the space between visual accessibility and meaningful synthesis control.],
+  ),
+  caption: [Comparison of existing tools and the design space occupied by The Shape of Sound.],
+) <tab-project-comparison>
 
 /*
 Guidance:
