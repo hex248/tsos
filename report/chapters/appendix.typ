@@ -2,6 +2,12 @@
 #pagebreak()
 = Appendix
 
+== Project Links
+
+- Demonstration video: https://www.youtube.com/watch?v=WYEJD3cmSd8
+- GitHub repository: https://www.github.com/hex248/tsos
+- Live application: https://tsos.ob248.com/
+
 == User Testing Materials
 
 The appendix below includes the user-testing form used during evaluation, followed by anonymised summaries of the completed responses. Participant names from the raw files have been replaced with participant labels in order to keep the appendix consistent with the anonymity principles described elsewhere in the report.
