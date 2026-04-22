@@ -2,6 +2,8 @@
 #pagebreak()
 = Appendix
 
+#set heading(outlined: false)
+
 == Project Links
 
 - Demonstration video: https://www.youtube.com/watch?v=WYEJD3cmSd8

@@ -12,7 +12,6 @@
   font: "Times New Roman",
   size: 12pt,
 )
-#let bib = bibliography("bibliography.bib")
 
 #align(center)[
   #text(size: 18pt)[
@@ -82,6 +81,7 @@
 #testing
 #conclusions_and_reflections
 
-#bibliography("bibliography.bib")
+= References
+#bibliography("references.bib", title: none)
 
 #appendix
