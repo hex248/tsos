@@ -17,7 +17,7 @@ Generative AI tools were used in a limited and supporting capacity during this p
   [Used during the literature review stage to help identify potentially relevant sources, which were then independently checked before inclusion.],
 
   [Claude],
-  [Used during the early planning stage to help narrow the technical stack in line with existing experience and desired areas of exploration.],
+  [Used during the early planning stage to help narrow the technical stack in line with existing experience and desired areas of exploration. Also used for rewording sentences in report writing stage.],
 )
 
 The final project reflects my own understanding, judgement, and academic contribution.
