@@ -31,27 +31,63 @@ The most important use case is the creation and shaping of a sound through direc
 
 At the audio level, these state values are not used directly. Instead, they are translated through a set of mapping functions into synthesizer behaviour that Tone.js can apply consistently across preview and export. The selected preset determines the base oscillator type, roundness controls the crossfade toward a smoother sine-based tone, and size is converted into gain so that visual scale affects perceived loudness. Envelope values are mapped into attack, hold, decay, and sustain timings, while wobble and wobble speed become tremolo depth and rate. In this way, the implementation keeps a clear separation between user-facing controls and low-level sound behaviour: users interact with meaningful visual properties, while the synthesizer receives the mapped values needed to produce coherent audio output.
 
+A simplified example of this mapping layer is shown below:
+
+```ts
+export function mapPresetToOscType(preset: Preset): "sawtooth" | "square" {
+    switch (preset) {
+        case "triangle":
+            return "sawtooth";
+        case "square":
+            return "square";
+    }
+}
+
+export function mapRoundnessToFade(roundness: number): number {
+    return clamp01(roundness / 100);
+}
+
+export function mapSizeToGain(size: number): number {
+    const minDb = -30;
+    const maxDb = -6;
+    const t = clamp01(size / 100);
+    return minDb + (maxDb - minDb) * t;
+}
+
+function clamp01(value: number) {
+    return Math.min(1, Math.max(0, value));
+}
+
+```
+
 In practice, preview playback is built around a small collection of audio nodes that are assembled each time a note or sample is played. The implementation creates a primary oscillator, a secondary sine oscillator, a crossfade node, and gain stages for envelope shaping and tremolo behaviour. This structure is important because it mirrors the design of the interaction model: the shape preset selects the main oscillator character, and roundness blends it toward a smoother sine tone. The resulting signal then passes through gain stages that apply the envelope and modulation behaviour before reaching the output. Each part of the signal chain therefore reflects a clear aspect of the user-facing design, and the same implementation pattern can be reused when previewing notes, holding sustained playback, or rendering exports.
 
 A simplified version of the central state model is shown below:
 
 ```ts
-type ShapeState = {
-  preset: "triangle" | "square"
-  color: string
-  roundness: number
-  size: number
-  wobble: number
-  wobbleSpeed: number
-  attack: number
-  hold: number
-  decay: number
-  sustain: number
-  octave: number
-  keyRoot: NoteName | null
-  scaleType: ScaleType
-  x: number
-  y: number
+export type Preset = "triangle" | "square";
+
+export interface IdeaSoundConfig {
+    preset: Preset;
+    roundness: number; // 0-100, controls morph from sharp to round
+    size: number; // 0-100, controls volume
+    wobble: number; // 0-100, shared visual wobble and tremolo depth
+    wobbleSpeed: number; // 0-100, shared animation and tremolo speed
+    wobbleRandomness: number;
+    grain: number; // 0-100, noise mix
+    attack: number; // 0-100, envelope attack time
+    hold: number; // 0-100, envelope hold time
+    decay: number; // 0-100, envelope decay time
+    sustain: number; // 0-100, envelope sustain level
+    color: string; // hex color from clavier keyboard
+    octave: number; // 1-8, frequency multiplier
+    keyRoot: NoteName | null;
+    scaleType: ScaleType;
+}
+
+export interface EditorShapeState extends IdeaSoundConfig {
+    x: number;
+    y: number;
 }
 ```
 
@@ -70,17 +106,19 @@ Persistence is implemented through two related flows: local drafts for unauthent
 
 In implementation terms, this flow is split deliberately between client-side convenience and server-side persistence. Local drafts are stored through a small browser storage layer, where the current sound configuration is converted into a lightweight draft record, validated against a schema, sorted by save time, and limited to the most recent draft. This keeps casual use simple while preventing local draft storage from expanding unnecessarily. For authenticated users, persistence moves through the API layer, where requests are validated with Zod before the database is touched, and ownership is checked before records can be updated or deleted. The server exposes separate routes for listing ideas, creating new records, reading a public or owned record, updating existing ideas, deleting them, and importing local drafts after sign-in. This separation is valuable because it means guest experimentation, authenticated ownership, and public sharing can all be supported through the same underlying sound configuration model, while still preserving clear boundaries between temporary local state and durable saved data.
 
-A simplified version of the persisted `Idea` schema is shown below:
+A snippet showing the persisted `Idea` schema is shown below:
 
 ```ts
 export const idea = pgTable("ideas", {
   id: uuid("id").primaryKey(),
-  ownerUserId: text("owner_user_id").notNull(),
+  ownerUserId: text("owner_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
   title: varchar("title", { length: 120 }).notNull(),
   config: jsonb("config").$type<IdeaSoundConfig>().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
-})
+}, (table) => ({
+  ownerUpdatedIndex: index("ideas_owner_updated_idx").on(table.ownerUserId, table.updatedAt),
+}));
 ```
 
 The final user-facing flow is export, which allows the generated sound to move beyond live interaction in the browser and into wider music-making workflows. This was implemented through an export dialog that lets the user choose format and whether the current envelope settings should be applied. Under the hood, the current state is rendered offline into an audio buffer rather than being recorded from live playback, which produces a cleaner and more controlled export path. The resulting buffer is then encoded as WAV or MP3 and downloaded directly in the browser. This implementation is important because it turns the application from a purely exploratory interface into a practical creative tool, allowing users to keep and reuse the sounds they create. In this way, export is not only a convenience feature, but part of how the application supports real ideation and integration with broader production workflows.
