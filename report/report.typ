@@ -64,6 +64,7 @@ All chapter word counts in this document are approximate and are not intended to
 #import "chapters/testing.typ": testing
 #import "chapters/conclusions_and_reflections.typ": conclusions_and_reflections
 #import "chapters/appendix.typ": appendix
+#import "chapters/bibliography.typ": bib
 
 #declaration
 #abstract
@@ -90,5 +91,7 @@ All chapter word counts in this document are approximate and are not intended to
 
 = References
 #bibliography("references.bib", title: none)
+
+#bib
 
 #appendix
