@@ -43,6 +43,13 @@
 
 #pagebreak()
 
+= Document Scope
+
+The purpose of this document is to describe and reflect on the processes that took place in developing the Final Project. Discuss any ethical issues associated with your project and describe the methodology that was adopted to develop its design, implementation and testing. 
+
+All chapter word counts in this document are approximate and are not intended to be prescriptive.
+#pagebreak()
+
 #import "chapters/declaration.typ": declaration
 #import "chapters/abstract.typ": abstract
 #import "chapters/acknowledgements.typ": acknowledgements
